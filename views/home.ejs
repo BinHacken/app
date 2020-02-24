@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+  <title>/bin/hacken</title>
+  <meta name="description" content="Hacker- &amp; Makerspace Bingen am Rhein">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <div class="name">
+        <a href="#">
+          <img src="images/logo.png" alt="binhacken Logo" width="95" height="33">
+        </a>
+      </div>
+      <nav>
+        <a class="nav-toggle" id="open-nav" href="#">&#9776;</a>
+        <a href="logout">Logout</a>
+        <!--
+        <a onclick="goto('home')">Home</a>
+        <a onclick="goto('termine')">Termine</a>
+        <a onclick="goto('ueberuns')">Über uns</a>
+        <a onclick="goto('kontakt')">Kontakt</a>-->
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <section>
+      <img src="https://img01.lachschon.de/images/108082_axtmann-medium.jpg">
+    </section>
+  </div>
+
+  <!-- JS -->
+  <script>
+    // Navigation
+    document.getElementById("open-nav").onclick = function() {
+      document.body.classList.toggle("nav-open");
+      return false;
+    };
+
+    // Scroll
+    function goto(div) {
+      var elmnt = document.getElementById(div).scrollIntoView();
+      window.scrollTo(window.scrollX, window.scrollY - 80);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,228 @@
+/* Cursor Icon */
+*, body {
+  cursor: url(../images/cursor.png) 4 12, auto;
+}
+
+a, button {
+  cursor: url(../images/cursor2.png) 4 12, pointer;
+}
+
+/* Grid */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  position: relative;
+  padding: 0 1rem;
+}
+
+/* Background, spacing and font */
+html {
+  background: #3c3c3c;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: san francisco, helvetica neue, helvetica, arial;
+  color: #fff;
+}
+
+/* Heading */
+h2 {
+  font-weight: 300;
+  font-size: 2.2em;
+  margin: .75rem 0;
+}
+
+/* Header */
+header .name {
+  font-size: 1.7em;
+  line-height: 0;
+}
+
+header .name a {
+  display: inline-block;
+}
+
+header .name img {
+  display: block;
+  width: auto;
+}
+
+header {
+  color: #fff;
+  padding: 20px 0;
+  background: #232323;
+  border-bottom: 5px solid #20c20e;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+header a {
+  color: #fff;
+  text-decoration: none;
+  z-index: 1;
+  position: relative;
+}
+
+header a:hover {
+  text-decoration: none;
+}
+
+header .company-name {
+  font-size: 1.7em;
+  line-height: 0;
+}
+
+header .company-name a {
+  display: inline-block;
+}
+
+header .company-name img {
+  display: block;
+  width: auto;
+}
+
+/* Nav */
+.nav-open nav {
+  border-bottom: 1px dotted rgba(255, 255, 255, .2);
+  padding: 10px 0;
+}
+
+.nav-open nav a {
+  display: block;
+}
+
+@media(min-width:620px) {
+  .nav-open nav {
+    border: 0;
+    padding: 0 20px
+  }
+
+  .nav-open nav a {
+    display: inline
+  }
+}
+
+nav {
+  text-transform: uppercase;
+  font-size: .8em;
+  width: 100%;
+}
+
+@media(min-width:620px) {
+  nav {
+    text-align: right;
+    position: absolute;
+    top: 13px;
+    right: 0;
+    padding: 0 20px
+  }
+}
+
+nav a {
+  margin: 0 3px;
+  padding: 20px 10px;
+  border-bottom: 1px solid transparent;
+  color: rgba(255, 255, 255, .8);
+  transition: .2s ease-in-out;
+  display: none;
+}
+
+@media(min-width:620px) {
+  nav a {
+    display: inline;
+    padding: 10px
+  }
+}
+
+nav a.nav-toggle {
+  display: inline;
+  position: absolute;
+  right: 10px;
+  top: -22px;
+  font-size: 1.9em;
+  border: 0;
+}
+
+@media(min-width:620px) {
+  nav a.nav-toggle {
+    display: none
+  }
+}
+
+nav a.nav-toggle:hover {
+  border: 0;
+}
+
+nav a:hover {
+  background: #20c20e;
+  color: #fff;
+}
+
+@media(min-width:620px) {
+  nav a.highlight {
+    border: 1px #ccc solid;
+    border-radius: 5px
+  }
+
+  nav a.highlight:hover {
+    background: #fff;
+    color: #4182e4
+  }
+}
+
+nav a.active {
+  color: #fff;
+}
+
+/* Section */
+section {
+  padding: 2rem 0;
+}
+
+section+section {
+  padding-top: 0;
+}
+
+/* Button */
+input[type=submit], button, .button {
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: .25rem;
+}
+
+.primary {
+  background: #007bff;
+  color: #fff;
+}
+
+.primary:hover {
+  background-color: #0069d9;
+}
+
+/* Form */
+input {
+  border-radius: .25rem;
+  border: 1px solid #ced4da;
+  line-height: 1.5;
+  padding: .375rem .75rem;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Login Form */
+#loginform * {
+  display: block;
+  margin: .25rem;
+}
