@@ -18,8 +18,17 @@ db.createUser('Spacehuhn', 'whatever').then(() => {
   });
 });
 */
-var hash = crypto.createHash('sha256').update('tobehashed').digest('hex');
-console.log(hash);
+//var hash = crypto.createHash('sha256').update('tobehashed').digest('hex');
+//console.log(hash);
+
+function check_login(req, res) {
+  if (req.session.loggedin) {
+    return true;
+  } else {
+    res.redirect('/login');
+    return false;
+  }
+}
 
 app.use(session({
   secret: 'secret',
@@ -34,27 +43,19 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-
 app.get('/login', function(req, res) {
-  if (req.session.loggedin) {
-    res.redirect('/home');
-  } else {
-    res.render('login', {
-      nope: req.query.nope,
-      loggedin: req.session.loggedin
-    });
-  }
+  res.render('login', {
+    nope: req.query.nope,
+    loggedin: req.session.loggedin
+  });
 });
 
 app.get('/home', function(req, res) {
-  if (req.session.loggedin) {
+  if (check_login(req, res)) {
     res.render('home', {
       loggedin: req.session.loggedin
     });
-  } else {
-    res.redirect('/login');
   }
-  res.end();
 });
 
 app.get('/logout', function(req, res) {
