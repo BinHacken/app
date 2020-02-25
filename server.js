@@ -5,9 +5,8 @@ const db = require('./data.js');
 const crypto = require('crypto');
 
 const app = express();
-/*
 const waitForDBtoInit = db.init();
-
+/*
 db.createUser('Spacehuhn', 'whatever').then(() => {
   db.auth('Spacehuhn', 'singlequotes').then(result => {
     console.log(result);
@@ -18,8 +17,6 @@ db.createUser('Spacehuhn', 'whatever').then(() => {
   });
 });
 */
-//var hash = crypto.createHash('sha256').update('tobehashed').digest('hex');
-//console.log(hash);
 
 function check_login(req, res) {
   if (req.session.loggedin) {
@@ -48,6 +45,14 @@ app.get('/login', function(req, res) {
     nope: req.query.nope,
     loggedin: req.session.loggedin
   });
+});
+
+app.get('/register', function(req, res) {
+  res.render('register', {
+    nope: req.query.nope,
+    loggedin: req.session.loggedin
+  });
+  db.getUserList().then(console.log);
 });
 
 app.get('/home', function(req, res) {
@@ -81,6 +86,32 @@ app.post('/auth', function(req, res) {
   } else {
     res.redirect('/login?nope=No username or password');
   }
+});
+
+app.post('/register', function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  var hash = crypto.createHash('sha256').update('tobehashed').digest('hex');
+
+  console.log(`Register "${username}","${hash}"`);
+
+  if (username && password) {
+    db.createUser(username, hash).then(() => {
+      req.session.loggedin = true;
+      req.session.username = username;
+      res.redirect('/home');
+    }).catch(err => {
+      res.redirect('/register?nope=Something fucked up');
+    });
+  } else {
+    res.redirect('/register?nope=No username or password');
+  }
+});
+
+app.get('/logout', function(req, res) {
+  req.session.destroy();
+  res.redirect('/login');
 });
 
 app.listen(80, function() {

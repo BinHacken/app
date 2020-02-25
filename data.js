@@ -12,7 +12,8 @@ const sequelize = new Sequelize({
 const User = sequelize.define('user', {
   name: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   password: {
     type: Sequelize.STRING,
@@ -24,7 +25,9 @@ const User = sequelize.define('user', {
 
 module.exports.init = function() {
   return sequelize.authenticate().then(() => {
-    console.log('DB connected');
+    sequelize.sync().then(() => {
+      console.log('DB connected');
+    });
   }).catch(err => {
     console.error('Unable to connect: ', err);
   });
@@ -46,12 +49,18 @@ module.exports.auth = function(username, password) {
 
 module.exports.createUser = function(username, password) {
   return sequelize.sync().then(() => {
-    User.create({
+    return User.create({
       name: username,
       password: password
     });
   });
 };
+
+module.exports.getUserList = function() {
+  return User.findAll({
+    attributes: ['name']
+  });
+}
 
 /*
 sequelize.sync().then(() => {

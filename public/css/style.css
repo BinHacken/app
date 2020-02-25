@@ -221,8 +221,7 @@ input {
   font-size: inherit;
 }
 
-/* Login Form */
-#loginform * {
+form * {
   display: block;
   margin: .25rem;
 }
