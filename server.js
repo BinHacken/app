@@ -24,7 +24,8 @@ console.log(hash);
 app.use(session({
   secret: 'secret',
   resave: true,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: {}
 }));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
@@ -33,10 +34,27 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+
 app.get('/login', function(req, res) {
-  res.render('login', {
-    nope: req.query.nope
-  });
+  if (req.session.loggedin) {
+    res.redirect('/home');
+  } else {
+    res.render('login', {
+      nope: req.query.nope,
+      loggedin: req.session.loggedin
+    });
+  }
+});
+
+app.get('/home', function(req, res) {
+  if (req.session.loggedin) {
+    res.render('home', {
+      loggedin: req.session.loggedin
+    });
+  } else {
+    res.redirect('/login');
+  }
+  res.end();
 });
 
 app.get('/logout', function(req, res) {
@@ -48,9 +66,7 @@ app.post('/auth', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
 
-  console.log('Login request:');
-  console.log(`Username: "${username}"`);
-  console.log(`Password: "${password}"`);
+  console.log(`Login "${username}","${password}"`);
 
   if (username && password) {
     // DB magic
@@ -62,18 +78,8 @@ app.post('/auth', function(req, res) {
       res.redirect('/login?nope=Access denied :(');
     }
   } else {
-    res.send('No username or password');
+    res.redirect('/login?nope=No username or password');
   }
-  res.end();
-});
-
-app.get('/home', function(req, res) {
-  if (req.session.loggedin) {
-    res.render('home');
-  } else {
-    res.redirect('/login');
-  }
-  res.end();
 });
 
 app.listen(80, function() {

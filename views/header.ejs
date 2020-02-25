@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="name">
+    <a href="#">
+      <img src="images/logo.png" alt="binhacken Logo" width="95" height="33">
+    </a>
+  </div>
+  <nav>
+    <a class="nav-toggle" id="open-nav" href="#">&#9776;</a>
+    <% if (loggedin) { %>
+    <a href="home">Home</a>
+    <a href="logout">Logout</a>
+    <% } %>
+  </nav>
+</div>
+<script>
+  // Navigation
+  document.getElementById("open-nav").onclick = function() {
+    document.body.classList.toggle("nav-open");
+    return false;
+  };
+  // Scroll
+  /*function goto(div) {
+    var elmnt = document.getElementById(div).scrollIntoView();
+    window.scrollTo(window.scrollX, window.scrollY - 80);
+  }*/
+</script>
