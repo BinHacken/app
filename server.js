@@ -71,6 +71,17 @@ app.get('/home', function(req, res) {
   }
 });
 
+app.get('/users', function(req, res) {
+  if (check_login(req, res)) {
+    db.getUserList().then((data) => {
+      res.render('users', {
+        loggedin: req.session.loggedin,
+        users: data
+      });
+    });
+  }
+});
+
 app.get('/logout', function(req, res) {
   req.session.destroy();
   res.redirect('/login');
