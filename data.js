@@ -40,10 +40,7 @@ module.exports.auth = function(username, password) {
       password: password
     }
   }).then(result => {
-    if (result.count > 0) {
-      return true;
-    }
-    return false;
+    return (result.count > 0);
   });
 };
 

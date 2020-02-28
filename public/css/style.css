@@ -219,6 +219,8 @@ input {
   padding: .375rem .75rem;
   font-family: inherit;
   font-size: inherit;
+  max-width: 100%;
+  width: 14rem;
 }
 
 form * {

@@ -18,6 +18,10 @@ db.createUser('Spacehuhn', 'whatever').then(() => {
 });
 */
 
+function hash(str) {
+  return crypto.createHash('sha256').update(str).digest('hex');
+}
+
 function check_login(req, res) {
   if (req.session.loggedin) {
     return true;
@@ -40,6 +44,10 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+app.get('/', function(req, res) {
+  res.redirect('/home');
+});
+
 app.get('/login', function(req, res) {
   res.render('login', {
     nope: req.query.nope,
@@ -50,9 +58,9 @@ app.get('/login', function(req, res) {
 app.get('/register', function(req, res) {
   res.render('register', {
     nope: req.query.nope,
-    loggedin: req.session.loggedin
+    loggedin: req.session.loggedin,
+    tan: req.query.tan
   });
-  db.getUserList().then(console.log);
 });
 
 app.get('/home', function(req, res) {
@@ -70,42 +78,38 @@ app.get('/logout', function(req, res) {
 
 app.post('/auth', function(req, res) {
   var username = req.body.username;
-  var password = req.body.password;
+  var password = hash(req.body.password);
 
   console.log(`Login "${username}","${password}"`);
 
-  if (username && password) {
-    // DB magic
-    if (username == 'Axt' && password == 'hacker') {
+  db.auth(username, password).then((success) => {
+    if (success) {
       req.session.loggedin = true;
       req.session.username = username;
       res.redirect('/home');
     } else {
       res.redirect('/login?nope=Access denied :(');
     }
-  } else {
-    res.redirect('/login?nope=No username or password');
-  }
+  });
 });
 
 app.post('/register', function(req, res) {
   var username = req.body.username;
-  var password = req.body.password;
+  var password = hash(req.body.password);
+  var tan = hash(req.body.tan);
 
-  var hash = crypto.createHash('sha256').update('tobehashed').digest('hex');
+  if (username && password && tan == 'c7fa24341ff66dc68f8f59f77e49e73929218e2970cf97eba4a95055a0a22a61') {
+    console.log(`Register "${username}","${password}"`);
 
-  console.log(`Register "${username}","${hash}"`);
-
-  if (username && password) {
-    db.createUser(username, hash).then(() => {
+    db.createUser(username, password).then(() => {
       req.session.loggedin = true;
       req.session.username = username;
       res.redirect('/home');
     }).catch(err => {
-      res.redirect('/register?nope=Something fucked up');
+      res.redirect('/register?nope=Benutzername schon vergeben');
     });
   } else {
-    res.redirect('/register?nope=No username or password');
+    res.redirect('/register?nope=Falsche TAN');
   }
 });
 

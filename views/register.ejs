@@ -13,20 +13,15 @@
   <div class="container">
     <section id="login">
       <form action="register" method="post">
-        <input type="text" placeholder="Benutzernamen" name="username" required>
+        <input type="text" placeholder="Benutzername" name="username" required>
         <input type="password" placeholder="Passwort" name="password" required>
+        <% if (tan) { %>
+        <input type="text" value="<%= tan %>" name="tan" required>
+        <% } else { %>
+        <input type="text" placeholder="TAN" name="tan" required>
+        <% } %>
         <button type="submit" class="primary">Register</button>
       </form>
-      <p>
-        Benutze ein gutes, einzigartiges Passwort und merke es dir.<br>
-        Wir garantieren für keinerlei Sicherheit.<br>
-        Wenn Du deine Logindaten vergisst, hast du Pech gehabt!<br>
-        <br>
-        Empfehlung: Benutze einen Passwortmanager.<br>
-        <br>
-        Mit der registrierung stimmst Du zu,
-        dass wir deinen Benutzernamen und Passwort speichern.
-      </p>
       <p>
         <% if (nope) { %>
         <%= nope %>
