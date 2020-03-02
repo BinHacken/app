@@ -7,17 +7,6 @@ const tanlist = require('./tan.js');
 
 const app = express();
 const waitForDBtoInit = db.init();
-/*
-db.createUser('Spacehuhn', 'whatever').then(() => {
-  db.auth('Spacehuhn', 'singlequotes').then(result => {
-    console.log(result);
-  }).then(() => {
-    db.auth('Spacehuhn', 'whatever').then(result => {
-      console.log(result);
-    });
-  });
-});
-*/
 
 function hash(str) {
   return crypto.createHash('sha256').update(str).digest('hex');

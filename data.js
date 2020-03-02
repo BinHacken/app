@@ -18,6 +18,9 @@ const User = sequelize.define('user', {
   password: {
     type: Sequelize.STRING,
     allowNull: false
+  },
+  data: {
+    type: Sequelize.TEXT
   }
 }, {
   // options
@@ -25,7 +28,9 @@ const User = sequelize.define('user', {
 
 module.exports.init = function() {
   return sequelize.authenticate().then(() => {
-    sequelize.sync().then(() => {
+    sequelize.sync({
+      alter: true
+    }).then(() => {
       console.log('DB connected');
     });
   }).catch(err => {
@@ -55,7 +60,7 @@ module.exports.createUser = function(username, password) {
 
 module.exports.getUserList = function() {
   return User.findAll({
-    attributes: ['name']
+    attributes: ['name', 'data']
   });
 }
 
