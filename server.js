@@ -3,6 +3,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const db = require('./data.js');
 const crypto = require('crypto');
+const tanlist = require('./tan.js');
 
 const app = express();
 const waitForDBtoInit = db.init();
@@ -109,7 +110,7 @@ app.post('/register', function(req, res) {
   var password = hash(req.body.password);
   var tan = hash(req.body.tan);
 
-  if (username && password && tan == 'c7fa24341ff66dc68f8f59f77e49e73929218e2970cf97eba4a95055a0a22a61') {
+  if (username && password && tanlist.check(tan)) {
     console.log(`Register "${username}","${password}"`);
 
     db.createUser(username, password).then(() => {
