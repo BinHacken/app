@@ -82,3 +82,14 @@ module.exports.updateUser = function(username, field, value) {
     return user.save();
   });
 }
+
+module.exports.deleteUser = function(username) {
+  return User.findOne({
+    where: {
+      name: username
+    }
+  }).then((user) => {
+    user.destroy();
+    return user.save();
+  });
+}

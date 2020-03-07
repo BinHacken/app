@@ -180,3 +180,20 @@ app.post('/update-pswd', function(req, res) {
     });
   }
 });
+
+app.post('/del-account', function(req, res) {
+  if (check_login(req, res)) {
+    var username = req.session.username;
+    var password = hash(req.body.password);
+
+    db.getUserData(username).then((data) => {
+      if (data.password == password) {
+        db.deleteUser(username).then(() => {
+          res.redirect(`/logout`);
+        });
+      } else {
+        res.redirect(`/profile?res=Falsches Passwort`);
+      }
+    });
+  }
+});

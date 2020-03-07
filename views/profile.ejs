@@ -11,25 +11,32 @@
   </header>
 
   <div class="container">
-    <section id="edit-username">
+    <section>
       <form method="post" action="update-name">
         <input type="text" name="username" value="<%= user.name %>" required>
         <button type="submit" class="primary">Benutzername ändern</button>
       </form>
     </section>
 
-    <section id="edit-data">
+    <section>
       <form method="post" action="update-data">
         <textarea name="data" rows="8" cols="80"><%= user.data %></textarea>
         <button type="submit" class="primary">Beschreibung ändern</button>
       </form>
     </section>
 
-    <section id="edit-password">
+    <section>
       <form method="post" action="update-pswd">
         <input type="password" placeholder="Altes Passwort" name="password_old" required>
         <input type="password" placeholder="Neues Passwort" name="password_new" required>
         <button type="submit" class="primary">Passwort ändern</button>
+      </form>
+    </section>
+
+    <section>
+      <form method="post" action="del-account">
+        <input type="password" placeholder="Passwort" name="password" required>
+        <button type="submit" class="danger">Account dauerhaft löschen</button>
       </form>
     </section>
 

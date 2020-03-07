@@ -211,6 +211,15 @@ input[type=submit], button, .button {
   background-color: #0069d9;
 }
 
+.danger {
+  background: #dc3545;
+  color: #fff;
+}
+
+.danger:hover {
+  background: #c82333
+}
+
 /* Form */
 input, textarea {
   border-radius: .25rem;
