@@ -9,6 +9,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
+    "markdown-it": "^10.0.0",
     "sequelize": "^5.21.3",
     "sqlite3": "^4.1.1"
   },

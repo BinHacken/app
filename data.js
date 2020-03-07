@@ -1,3 +1,5 @@
+const md = require('markdown-it')().disable(['html_inline', 'image']);
+
 const {
   Sequelize,
   Model,
@@ -11,19 +13,28 @@ const sequelize = new Sequelize({
 
 const User = sequelize.define('user', {
   name: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
     unique: true
   },
   password: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false
   },
   data: {
-    type: Sequelize.TEXT
+    type: DataTypes.TEXT
+  },
+  html: {
+    type: DataTypes.VIRTUAL(DataTypes.TEXT, ['data']),
+    get() {
+      return md.render(`${this.data}`);
+    },
+    set(value) {
+      throw new Error('Do not try to set the `html` value!');
+    }
   }
 }, {
-  // options
+  // Options
 });
 
 module.exports.init = function() {
@@ -60,7 +71,7 @@ module.exports.createUser = function(username, password) {
 
 module.exports.getUserList = function() {
   return User.findAll({
-    attributes: ['name', 'data']
+    attributes: ['name', 'html']
   });
 }
 
