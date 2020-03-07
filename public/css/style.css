@@ -212,7 +212,7 @@ input[type=submit], button, .button {
 }
 
 /* Form */
-input {
+input, textarea {
   border-radius: .25rem;
   border: 1px solid #ced4da;
   line-height: 1.5;

@@ -64,58 +64,21 @@ module.exports.getUserList = function() {
   });
 }
 
-/*
-sequelize.sync().then(() => {
-  User.create({
-    name: username,
-    password: password
-  });
-});
-*/
-
-/*
-var user = await User.create({
-  name: username,
-  password: password
-});
-return user;
-*/
-
-/*
-const User = sequelize.define('user', {
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-  password: {
-    type: Sequelize.STRING,
-    allowNull: false
-  }
-}, {
-  // options
-});
-
-sequelize.sync().then(() =>
-  User.create({
-    name: "Spacehuhn",
-    password: "whatever"
-  })).then(user => {
-  console.log("User's auto-generated ID:", user.id);
-});
-
-var getUser = function(username) {
-  return User.findAll({
-    attributes: [
-      'name',
-      'password'
-    ],
+module.exports.getUserData = function(username) {
+  return User.findOne({
     where: {
       name: username
-    },
-    limit: 1
+    }
   });
-};
-/*
-getUser("Spacehuhn").then(function(data) {
-  console.log(data[0].dataValues);
-});*/
+}
+
+module.exports.updateUser = function(username, field, value) {
+  return User.findOne({
+    where: {
+      name: username
+    }
+  }).then((user) => {
+    user.set(field, value);
+    return user.save();
+  });
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <%- include('head'); %>
+</head>
+
+<body>
+  <header>
+    <%- include('header'); %>
+  </header>
+
+  <div class="container">
+    <section id="edit-username">
+      <form method="post" action="update-name">
+        <input type="text" name="username" value="<%= user.name %>" required>
+        <button type="submit" class="primary">Benutzername ändern</button>
+      </form>
+    </section>
+
+    <section id="edit-data">
+      <form method="post" action="update-data">
+        <textarea name="data" rows="8" cols="80"><%= user.data %></textarea>
+        <button type="submit" class="primary">Beschreibung ändern</button>
+      </form>
+    </section>
+
+    <section id="edit-password">
+      <form method="post" action="update-pswd">
+        <input type="password" placeholder="Altes Passwort" name="password_old" required>
+        <input type="password" placeholder="Neues Passwort" name="password_new" required>
+        <button type="submit" class="primary">Passwort ändern</button>
+      </form>
+    </section>
+
+    <section id="res">
+      <p>
+        <% if(res) { %>
+        <%= res %>
+        <% } %>
+      </p>
+    </section>
+  </div>
+</body>
+
+</html>

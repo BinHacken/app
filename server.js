@@ -1,3 +1,4 @@
+// =========== Globals ========== //
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -8,6 +9,7 @@ const tanlist = require('./tan.js');
 const app = express();
 const waitForDBtoInit = db.init();
 
+// ===== Helper functions ===== //
 function hash(str) {
   return crypto.createHash('sha256').update(str).digest('hex');
 }
@@ -21,6 +23,7 @@ function check_login(req, res) {
   }
 }
 
+// ===== Express App ===== //
 app.use(session({
   secret: 'secret',
   resave: true,
@@ -34,6 +37,11 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+app.listen(80, function() {
+  console.log('Server started');
+});
+
+// ===== GET Callbacks ===== //
 app.get('/', function(req, res) {
   res.redirect('/home');
 });
@@ -72,11 +80,29 @@ app.get('/users', function(req, res) {
   }
 });
 
+app.get('/profile', function(req, res) {
+  if (check_login(req, res)) {
+    db.getUserData(req.session.username).then((data) => {
+      res.render('profile', {
+        loggedin: req.session.loggedin,
+        user: data,
+        res: req.query.res
+      });
+    });
+  }
+});
+
 app.get('/logout', function(req, res) {
   req.session.destroy();
   res.redirect('/login');
 });
 
+app.get('/logout', function(req, res) {
+  req.session.destroy();
+  res.redirect('/login');
+});
+
+// ===== POST Callbacks ===== //
 app.post('/auth', function(req, res) {
   var username = req.body.username;
   var password = hash(req.body.password);
@@ -114,11 +140,43 @@ app.post('/register', function(req, res) {
   }
 });
 
-app.get('/logout', function(req, res) {
-  req.session.destroy();
-  res.redirect('/login');
+app.post('/update-name', function(req, res) {
+  if (check_login(req, res)) {
+    var old_username = req.session.username;
+    var new_username = req.body.username;
+
+    db.updateUser(old_username, 'name', new_username).then(() => {
+      req.session.username = new_username;
+      res.redirect(`/profile?res=Benutzername geändert zu ${new_username}`);
+    });
+  }
 });
 
-app.listen(80, function() {
-  console.log('Server started');
+app.post('/update-data', function(req, res) {
+  if (check_login(req, res)) {
+    var username = req.session.username;
+    var new_data = req.body.data;
+
+    db.updateUser(username, 'data', new_data).then(() => {
+      res.redirect(`/profile?res=Beschreibung geändert`);
+    });
+  }
+});
+
+app.post('/update-pswd', function(req, res) {
+  if (check_login(req, res)) {
+    var username = req.session.username;
+    var old_password = hash(req.body.password_old);
+    var new_password = hash(req.body.password_new);
+
+    db.getUserData(username).then((data) => {
+      if (data.password == old_password) {
+        db.updateUser(username, 'password', new_password).then(() => {
+          res.redirect(`/profile?res=Passwort geändert`);
+        });
+      } else {
+        res.redirect(`/profile?res=Falsches Passwort`);
+      }
+    });
+  }
 });
