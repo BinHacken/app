@@ -1,7 +1,7 @@
 {
-  "name": "binhackenapp",
+  "name": "binhacken_orka",
   "version": "1.0.0",
-  "description": "app for binhacken",
+  "description": "organisation app for binhacken",
   "main": "sever.js",
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -16,8 +16,8 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "pm2 start server.js --watch"
   },
-  "author": "me",
+  "author": "binhacken",
   "license": "MIT"
 }
