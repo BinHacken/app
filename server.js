@@ -166,9 +166,15 @@ app.post('/update-name', function(req, res) {
     var old_username = req.session.username;
     var new_username = req.body.username;
 
-    db.updateUser(old_username, 'name', new_username).then(() => {
-      req.session.username = new_username;
-      res.redirect(`/profile?res=Benutzername geändert zu ${new_username}`);
+    db.exists(new_username).then((exists) => {
+      if (!exists) {
+        db.updateUser(old_username, 'name', new_username).then(() => {
+          req.session.username = new_username;
+          res.redirect(`/profile?res=Benutzername geändert zu ${new_username}`);
+        });
+      } else {
+        res.redirect(`/profile?res=Benutzername schon vergeben`);
+      }
     });
   }
 });

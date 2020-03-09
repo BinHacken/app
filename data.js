@@ -104,3 +104,13 @@ module.exports.deleteUser = function(username) {
     return user.save();
   });
 }
+
+module.exports.exists = function(username) {
+  return User.count({
+    where: {
+      name: username
+    }
+  }).then(count => {
+    return count > 0;
+  });
+}
