@@ -1,3 +1,5 @@
 tan.js
 node_modules/
 *.db
+*.db-journal
+public/.well-known/*
