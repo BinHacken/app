@@ -16,7 +16,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "pm2 start server.js --watch"
+    "start": "pm2 start pm2.json"
   },
   "author": "binhacken",
   "license": "MIT"

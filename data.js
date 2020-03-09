@@ -8,7 +8,7 @@ const {
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: './bindata.db'
+  storage: './private/bindata.db'
 });
 
 const User = sequelize.define('user', {
