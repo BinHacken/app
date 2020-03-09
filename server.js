@@ -1,4 +1,7 @@
 // =========== Globals ========== //
+const fs = require('fs');
+const http = require('http');
+const https = require('https');
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -8,6 +11,17 @@ const tanlist = require('./tan.js');
 
 const app = express();
 const waitForDBtoInit = db.init();
+
+// ========== SSL ========== //
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/chain.pem', 'utf8');
+
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+  ca: ca
+};
 
 // ===== Helper functions ===== //
 function hash(str) {
@@ -37,9 +51,11 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-app.listen(80, function() {
-  console.log('Server started');
-});
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
+
+httpServer.listen(80);
+httpsServer.listen(443);
 
 // ===== GET Callbacks ===== //
 app.get('/', function(req, res) {
