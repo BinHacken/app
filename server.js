@@ -12,16 +12,7 @@ const tanlist = require('./tan.js');
 const app = express();
 const waitForDBtoInit = db.init();
 
-// ========== SSL ========== //
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/cert.pem', 'utf8');
-const ca = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/chain.pem', 'utf8');
-
-const credentials = {
-  key: privateKey,
-  cert: certificate,
-  ca: ca
-};
+const args = process.argv.slice(2);
 
 // ===== Helper functions ===== //
 function hash(str) {
@@ -51,11 +42,25 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+// ===== HTTP Server ===== //
 const httpServer = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
-
 httpServer.listen(80);
-httpsServer.listen(443);
+
+// ===== HTTPS Server ===== //
+if (args.includes('https')) {
+  const privateKey = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/privkey.pem', 'utf8');
+  const certificate = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/cert.pem', 'utf8');
+  const ca = fs.readFileSync('/etc/letsencrypt/live/binhacken.app/chain.pem', 'utf8');
+
+  const credentials = {
+    key: privateKey,
+    cert: certificate,
+    ca: ca
+  };
+
+  const httpsServer = https.createServer(credentials, app);
+  httpsServer.listen(443);
+}
 
 // ===== GET Callbacks ===== //
 app.get('/', function(req, res) {
