@@ -1,4 +1,5 @@
 const md = require('markdown-it')().disable(['html_inline', 'image']);
+const hash = require('./hash.js');
 
 const {
   Sequelize,
@@ -13,16 +14,22 @@ const sequelize = new Sequelize({
 
 const User = sequelize.define('user', {
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(32),
     allowNull: false,
     unique: true
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    set(value) {
+      this.setDataValue('password', hash.make(value));
+    }
   },
   data: {
-    type: DataTypes.TEXT
+    type: DataTypes.TEXT,
+    set(value) {
+      this.setDataValue('data', value.substring(0, 2048));
+    }
   },
   html: {
     type: DataTypes.VIRTUAL(DataTypes.TEXT, ['data']),
@@ -53,7 +60,7 @@ module.exports.auth = function(username, password) {
   return User.findAndCountAll({
     where: {
       name: username,
-      password: password
+      password: hash.make(password)
     }
   }).then(result => {
     return (result.count > 0);

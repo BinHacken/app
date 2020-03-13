@@ -13,7 +13,7 @@
   <div class="container">
     <section id="login">
       <form action="register" method="post">
-        <input type="text" placeholder="Benutzername" name="username" required>
+        <input type="text" placeholder="Benutzername" name="username" maxlength="32" required>
         <input type="password" placeholder="Passwort" name="password" required>
         <% if (tan) { %>
         <input type="text" value="<%= tan %>" name="tan" required>

@@ -6,8 +6,8 @@ const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const db = require('./data.js');
-const crypto = require('crypto');
 const tanlist = require('./tan.js');
+const hash = require('./hash.js');
 
 const app = express();
 const waitForDBtoInit = db.init();
@@ -15,9 +15,6 @@ const waitForDBtoInit = db.init();
 const args = process.argv.slice(2);
 
 // ===== Helper functions ===== //
-function hash(str) {
-  return crypto.createHash('sha256').update(str).digest('hex');
-}
 
 function check_login(req, res) {
   if (req.session.loggedin) {
@@ -126,7 +123,7 @@ app.get('/logout', function(req, res) {
 // ===== POST Callbacks ===== //
 app.post('/auth', function(req, res) {
   var username = req.body.username;
-  var password = hash(req.body.password);
+  var password = req.body.password;
 
   console.log(`Login "${username}","${password}"`);
 
@@ -143,11 +140,11 @@ app.post('/auth', function(req, res) {
 
 app.post('/register', function(req, res) {
   var username = req.body.username;
-  var password = hash(req.body.password);
-  var tan = hash(req.body.tan);
+  var password = req.body.password;
+  var tan = req.body.tan;
 
   if (username && password && tanlist.check(tan)) {
-    console.log(`Register "${username}","${password}"`);
+    console.log(`Register "${username}"`);
 
     db.createUser(username, password).then(() => {
       req.session.loggedin = true;
@@ -193,11 +190,11 @@ app.post('/update-data', function(req, res) {
 app.post('/update-pswd', function(req, res) {
   if (check_login(req, res)) {
     var username = req.session.username;
-    var old_password = hash(req.body.password_old);
-    var new_password = hash(req.body.password_new);
+    var old_password = req.body.password_old;
+    var new_password = req.body.password_new;
 
     db.getUserData(username).then((data) => {
-      if (data.password == old_password) {
+      if (hash.compare(old_password, data.password)) {
         db.updateUser(username, 'password', new_password).then(() => {
           res.redirect(`/profile?res=Passwort geändert`);
         });
@@ -211,10 +208,10 @@ app.post('/update-pswd', function(req, res) {
 app.post('/del-account', function(req, res) {
   if (check_login(req, res)) {
     var username = req.session.username;
-    var password = hash(req.body.password);
+    var password = req.body.password;
 
     db.getUserData(username).then((data) => {
-      if (data.password == password) {
+      if (hash.compare(password, data.password)) {
         db.deleteUser(username).then(() => {
           res.redirect(`/logout`);
         });
