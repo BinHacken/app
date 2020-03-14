@@ -44,17 +44,44 @@ const User = sequelize.define('user', {
   // Options
 });
 
+const Session = sequelize.define('session', {
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  sid: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  token: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  // Options
+});
+
+// ========== Functions ========== //
 module.exports.init = function() {
   return sequelize.authenticate().then(() => {
-    sequelize.sync({
+    return sequelize.sync({
       alter: true
-    }).then(() => {
-      console.log('DB connected');
     });
+  }).then(() => {
+    // remove old sessions
+    return sequelize.query("DELETE FROM `sessions` WHERE `date` <= date('now','-30 day')", {
+      raw: true
+    });
+  }).then(() => {
+    console.log('DB connected');
   }).catch(err => {
     console.error('Unable to connect: ', err);
   });
-};
+}
 
 module.exports.auth = function(username, password) {
   return User.findAndCountAll({
