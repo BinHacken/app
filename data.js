@@ -1,5 +1,7 @@
+// ========== Imports ========== //
 const md = require('markdown-it')().disable(['html_inline', 'image']);
 const hash = require('./hash.js');
+const crypto = require('crypto');
 
 const {
   Sequelize,
@@ -12,6 +14,7 @@ const sequelize = new Sequelize({
   storage: './private/bindata.db'
 });
 
+// ========== Tables ========== //
 const User = sequelize.define('user', {
   name: {
     type: DataTypes.STRING(32),
@@ -94,12 +97,83 @@ module.exports.auth = function(username, password) {
   });
 };
 
+module.exports.createSession = function(username) {
+  var sid = crypto.randomBytes(16).toString('hex');
+  var token = crypto.randomBytes(16).toString('hex');
+
+  return Session.create({
+    username: username,
+    sid: sid,
+    token: token
+  });
+};
+
+module.exports.authSession = function(username, sid, token) {
+  // find sessions
+  return Session.findOne({
+    where: {
+      username: username,
+      sid: sid,
+      token: token
+    }
+  }).then((session) => {
+    // found => update token
+    if (session) {
+      console.log("Found session!");
+      console.log("Upading token...");
+
+      var newtoken = crypto.randomBytes(16).toString('hex');
+      session.set("token", newtoken);
+
+      return session.save();
+    }
+
+    // not found => remove all sessions with sid
+    else {
+      console.log("Session not found!");
+      console.log("Deleting all sessions with that SID");
+
+      return Session.destroy({
+        where: {
+          sid: sid
+        }
+      });
+    }
+  });
+};
+
+module.exports.deleteSession = function(username, sid) {
+  return Session.destroy({
+    where: {
+      username: username,
+      sid: sid
+    }
+  });
+};
+
+module.exports.updateSession = function(username, sid) {
+  return Session.destroy({
+    where: {
+      username: username,
+      sid: sid
+    }
+  });
+};
+
+module.exports.renameSession = function(old_username, new_username) {
+  return Session.update({
+    username: new_username
+  }, {
+    where: {
+      username: old_username
+    }
+  });
+}
+
 module.exports.createUser = function(username, password) {
-  return sequelize.sync().then(() => {
-    return User.create({
-      name: username,
-      password: password
-    });
+  return User.create({
+    name: username,
+    password: password
   });
 };
 
