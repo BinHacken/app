@@ -15,6 +15,9 @@
       <form action="auth" method="post">
         <input type="text" placeholder="Benutzername" name="username" maxlength="32" required>
         <input type="password" placeholder="Passwort" name="password" required>
+        <% if (url) { %>
+        <input type="hidden" name="url" value="<%= url %>">
+        <% } %>
         <button type="submit" class="primary">Login</button>
       </form>
       <p>
