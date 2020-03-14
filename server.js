@@ -4,6 +4,7 @@ const http = require('http');
 const https = require('https');
 const express = require('express');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const db = require('./data.js');
 const tanlist = require('./tan.js');
