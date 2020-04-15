@@ -145,7 +145,7 @@ const Token = sequelize.define('token', {
     allowNull: false
   },
   data: {
-    type: DataTypes.STRING(512),
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   date: {
@@ -414,8 +414,22 @@ module.exports.removeProjectTodo = function(id) {
 }
 
 module.exports.addToken = function(username, token) {
-  return Token.create({
-    username: username,
-    data: token
-  });
+  return Token.count({
+    where: {
+      username: username
+    }
+  }).then(result => {
+    if (result > 150) {
+      Token.destroy({
+        where: {
+          username: username
+        }
+      });
+    }
+  }).then(() => {
+    return Token.create({
+      username: username,
+      data: token
+    });
+  })
 }
