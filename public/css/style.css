@@ -200,6 +200,7 @@ input[type=submit], button, .button {
   font-size: 1rem;
   line-height: 1.5;
   border-radius: .25rem;
+  text-decoration: none;
 }
 
 .primary {
@@ -260,7 +261,7 @@ ul li:nth-child(even) {
   background: #303030;
 }
 
-ul li .username {
+ul li .title {
   display: block;
   padding-bottom: .75rem;
   border-bottom: 1px solid #20c20e;
@@ -268,12 +269,12 @@ ul li .username {
 
 @media(min-width:620px) {
   ul {
-    padding: 0 1rem;
+    /*padding: 0 1rem;*/
   }
 
   ul li {
     margin: 0 auto;
-    max-width: 60rem;
+    /*max-width: 60rem;*/
   }
 
   ul li:first-child {

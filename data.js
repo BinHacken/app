@@ -68,6 +68,27 @@ const Session = sequelize.define('session', {
   // Options
 });
 
+const Link = sequelize.define('link', {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  url: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  // Options
+});
+
 // ========== Functions ========== //
 module.exports.init = function() {
   return sequelize.authenticate().then(() => {
@@ -220,5 +241,26 @@ module.exports.exists = function(username) {
     }
   }).then(count => {
     return count > 0;
+  });
+}
+
+module.exports.createLink = function(name, url, username) {
+  return Link.create({
+    name: name,
+    url: url,
+    username: username
+  });
+}
+
+module.exports.getLinks = function() {
+  return Link.findAll();
+}
+
+module.exports.deleteLink = function(name, url) {
+  return Link.destroy({
+    where: {
+      name: name,
+      url: url
+    }
   });
 }

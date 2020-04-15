@@ -173,8 +173,11 @@ app.get('/register', function(req, res) {
 app.get('/home', function(req, res) {
   if (!loggedin(req, res, 'home')) return;
 
-  res.render('home', {
-    loggedin: req.session.loggedin
+  db.getLinks().then((data) => {
+    res.render('home', {
+      loggedin: req.session.loggedin,
+      links: data
+    });
   });
 });
 
@@ -186,6 +189,33 @@ app.get('/users', function(req, res) {
       loggedin: req.session.loggedin,
       users: data
     });
+  });
+});
+
+app.get('/links', function(req, res) {
+  if (!loggedin(req, res, 'links')) return;
+
+  db.getLinks().then((data) => {
+    return res.render('links', {
+      loggedin: req.session.loggedin,
+      links: data
+    });
+  });
+});
+
+app.get('/del-link', function(req, res) {
+  if (!loggedin(req, res, 'links')) return;
+
+  var name = req.query.name;
+  var url = req.query.url;
+
+  console.log(name);
+  console.log(url);
+
+  db.deleteLink(name, url).then(() => {
+    res.redirect(`/links`);
+  }).catch(err => {
+    res.redirect('/links?nope=Something fucked up');
   });
 });
 
@@ -251,9 +281,7 @@ app.post('/register', function(req, res) {
   var tan = req.body.tan;
 
   if (username && password && tanlist.check(tan)) {
-    console.log(`
-              Register "${username}"
-              `);
+    console.log(`Register "${username}"`);
 
     db.createUser(username, password).then(() => {
       req.session.loggedin = true;
@@ -285,15 +313,9 @@ app.post('/update-name', function(req, res) {
 
     return db.renameSession(old_username, new_username);
   }).then(() => {
-    res.redirect(` / profile ? res = Benutzername geändert zu $ {
-                new_username
-              }
-              `);
+    res.redirect(`/profile?res=Benutzername geändert zu $ {new_username}`);
   }).catch((msg) => {
-    res.redirect(` / profile ? res = $ {
-                msg
-              }
-              `);
+    res.redirect(`/profile?res=${msg}`);
   });
 });
 
@@ -304,7 +326,7 @@ app.post('/update-data', function(req, res) {
   var new_data = req.body.data;
 
   db.updateUser(username, 'data', new_data).then(() => {
-    res.redirect(` / profile ? res = Beschreibung geändert `);
+    res.redirect(`/profile?res=Beschreibung geändert`);
   });
 });
 
@@ -318,10 +340,10 @@ app.post('/update-pswd', function(req, res) {
   db.getUserData(username).then((data) => {
     if (hash.compare(old_password, data.password)) {
       db.updateUser(username, 'password', new_password).then(() => {
-        res.redirect(` / profile ? res = Passwort geändert `);
+        res.redirect(`/profile?res=Passwort geändert`);
       });
     } else {
-      res.redirect(` / profile ? res = Falsches Passwort `);
+      res.redirect(`/profile?res=Falsches Passwort`);
     }
   });
 });
@@ -335,10 +357,24 @@ app.post('/del-account', function(req, res) {
   db.getUserData(username).then((data) => {
     if (hash.compare(password, data.password)) {
       db.deleteUser(username).then(() => {
-        res.redirect(` / logout `);
+        res.redirect(`/logout`);
       });
     } else {
-      res.redirect(` / profile ? res = Falsches Passwort `);
+      res.redirect(`/profile?res=Falsches Passwort`);
     }
+  });
+});
+
+app.post('/add-link', function(req, res) {
+  if (!loggedin(req, res, 'links')) return;
+
+  var username = req.session.username;
+  var name = req.body.name;
+  var url = req.body.url;
+
+  db.createLink(name, url, username).then(() => {
+    res.redirect('/links');
+  }).catch(err => {
+    res.redirect('/links?nope=Something fucked up');
   });
 });

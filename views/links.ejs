@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <%- include('head'); %>
+</head>
+
+<body>
+  <header>
+    <%- include('header'); %>
+  </header>
+
+  <div class="container">
+
+    <ul>
+      <li>Links</li>
+      <% links.forEach(function(link){ %>
+      <li>
+        <a class="button primary" href="<%= link.url %>" target="_blank"><%= link.name %></a>
+        <a class="button danger" href="del-link?url=<%= link.url %>&name=<%= link.name %>">X</a>
+      </li>
+      <% }); %>
+    </ul>
+
+    <form method="post" action="add-link">
+      <input type="text" placeholder="Name" name="name">
+      <input type="text" placeholder="URL" name="url">
+      <button type="submit" class="primary">Hinzufügen</button>
+    </form>
+  </div>
+</body>
+
+</html>

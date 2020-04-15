@@ -12,7 +12,15 @@
 
   <div class="container">
     <section>
-      <h2>Welcome to <img style="height: 1rem;" src="images/logo.png"></h2>
+      <h2>Willkommen bei <img style="height: 1rem;" src="images/logo.png"></h2>
+      <ul>
+        <li>Externe Links</li>
+        <li>
+          <% links.forEach(function(link){ %>
+          <a class="button primary" href="<%= link.url %>" target="_blank"><%= link.name %></a>
+          <% }); %>
+        </li>
+      </ul>
     </section>
   </div>
 </body>
