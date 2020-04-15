@@ -10,21 +10,20 @@
     <%- include('header'); %>
   </header>
 
-  <ul>
-    <li>Registrierte Mitglieder</li>
-    <% users.forEach(function(user){ %>
-    <li>
-      <span class="title">
-        <%= user.name %>
-      </span>
-      <span class="userdata">
-        <%- user.html %>
-      </span>
-    </li>
-    <% }); %>
-  </ul>
-
   <div class="container">
+    <ul>
+      <li>Registrierte Mitglieder</li>
+      <% users.forEach(function(user){ %>
+      <li>
+        <span class="title">
+          <%= user.name %>
+        </span>
+        <span class="userdata">
+          <%- user.html %>
+        </span>
+      </li>
+      <% }); %>
+    </ul>
   </div>
 </body>
 
