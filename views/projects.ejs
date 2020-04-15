@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <%- include('head'); %>
+</head>
+
+<body>
+  <header>
+    <%- include('header'); %>
+  </header>
+
+  <div class="container">
+    <section>
+      <ul>
+        <li>Projekte</li>
+        <% projects.forEach(function(project){ %>
+        <li>
+          <span class="title">
+            <%= project.name %>
+          </span>
+          <span class="userdata">
+            <%- project.html %>
+          </span>
+          Maintainers:
+          <span class="maintainers">
+            <% project.maintainers.forEach(function(maintainer){ %>
+            <a><%- maintainer.username %></a>,
+            <% }); %>
+          </span>
+        </li>
+        <% }); %>
+      </ul>
+    </section>
+
+    <section>
+      <form method="post" action="new-project">
+        <input type="text" name="name" maxlength="32" required>
+        <button type="submit" class="primary">Neues Projekt</button>
+      </form>
+    </section>
+
+  </div>
+</body>
+
+</html>

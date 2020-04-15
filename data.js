@@ -89,11 +89,73 @@ const Link = sequelize.define('link', {
   // Options
 });
 
+const Project = sequelize.define('project', {
+  name: {
+    type: DataTypes.STRING(32),
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    set(value) {
+      this.setDataValue('data', value.substring(0, 2048));
+    }
+  },
+  html: {
+    type: DataTypes.VIRTUAL(DataTypes.TEXT, ['description']),
+    get() {
+      return md.render(`${this.description}`);
+    },
+    set(value) {
+      throw new Error('Do not try to set the `html` value!');
+    }
+  }
+}, {
+  // Options
+});
+
+const Maintainer = sequelize.define('maintainer', {
+  username: {
+    type: DataTypes.STRING(32),
+    allowNull: false
+  }
+}, {
+  // Options
+});
+
+const Todo = sequelize.define('todo', {
+  description: {
+    type: DataTypes.STRING(512),
+    allowNull: false
+  },
+  username: {
+    type: DataTypes.STRING(32),
+    allowNull: false
+  },
+  date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  // Options
+});
+
+// ========== Relationships ========== //
+
+Project.hasMany(Maintainer, {
+  as: 'maintainers',
+  onDelete: 'SET NULL'
+});
+
+Project.hasMany(Todo, {
+  as: 'todos',
+  onDelete: 'SET NULL'
+});
+
 // ========== Functions ========== //
 module.exports.init = function() {
   return sequelize.authenticate().then(() => {
     return sequelize.sync({
-      alter: true
+      alter: false
     });
   }).then(() => {
     // remove old sessions
@@ -261,6 +323,71 @@ module.exports.deleteLink = function(name, url) {
     where: {
       name: name,
       url: url
+    }
+  });
+}
+
+module.exports.getProjects = function() {
+  return Project.findAll({
+    include: [{
+      model: Maintainer,
+      as: 'maintainers'
+    }, {
+      model: Todo,
+      as: 'todos'
+    }]
+  });
+}
+
+module.exports.addProject = function(name, username) {
+  return Project.create({
+    name: name
+  }).then((project) => {
+    return Maintainer.create({
+      projectId: project.id,
+      username: username
+    });
+  });
+}
+
+module.exports.editProject = function(id, name, description) {
+  return Project.update({
+    name: name,
+    description: description
+  }, {
+    where: {
+      id: id
+    }
+  });
+}
+
+module.exports.addProjectMaintainer = function(projectId, username) {
+  return Maintainer.create({
+    projectId: projectId,
+    username: username
+  });
+}
+
+module.exports.removeProject = function(projectId) {
+  return Project.destroy({
+    where: {
+      id: projectId
+    }
+  });
+}
+
+module.exports.addProjectTodo = function(projectId, description, username) {
+  return Todo.create({
+    projectId: projectId,
+    description: description,
+    username: username
+  });
+}
+
+module.exports.removeProjectTodo = function(id) {
+  return Todo.destroy({
+    where: {
+      id: id
     }
   });
 }

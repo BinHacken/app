@@ -173,10 +173,10 @@ app.get('/register', function(req, res) {
 app.get('/home', function(req, res) {
   if (!loggedin(req, res, 'home')) return;
 
-  db.getLinks().then((data) => {
+  db.getLinks().then((links) => {
     res.render('home', {
       loggedin: req.session.loggedin,
-      links: data
+      links: links
     });
   });
 });
@@ -188,6 +188,17 @@ app.get('/users', function(req, res) {
     res.render('users', {
       loggedin: req.session.loggedin,
       users: data
+    });
+  });
+});
+
+app.get('/projects', function(req, res) {
+  if (!loggedin(req, res, 'projects')) return;
+
+  db.getProjects().then((data) => {
+    res.render('projects', {
+      loggedin: req.session.loggedin,
+      projects: data
     });
   });
 });

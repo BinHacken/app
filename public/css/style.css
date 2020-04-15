@@ -1,6 +1,11 @@
 /* General stuff */
 a {
   color: #20c20e;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 /* Cursor Icon */
