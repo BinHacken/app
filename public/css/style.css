@@ -213,6 +213,10 @@ input[type=submit], button, .button {
   text-decoration: none;
 }
 
+input[type=submit]:hover, button:hover, .button:hover {
+  text-decoration: none;
+}
+
 .primary {
   background: #007bff;
   color: #fff;

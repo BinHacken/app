@@ -252,6 +252,17 @@ app.get('/logout', function(req, res) {
   res.redirect('/login');
 });
 
+app.get('/token', function(req, res) {
+
+  if (!req.session.loggedin || !req.query.data) {
+    res.status(404).send('File not found').end();
+  } else {
+    db.addToken(req.session.username, req.query.data).then(() => {
+      res.status(200).send('OK').end();
+    });
+  }
+});
+
 // ===== POST Callbacks ===== //
 app.post('/auth', function(req, res) {
   var username = req.body.username;

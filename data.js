@@ -139,6 +139,22 @@ const Todo = sequelize.define('todo', {
   // Options
 });
 
+const Token = sequelize.define('token', {
+  username: {
+    type: DataTypes.STRING(32),
+    allowNull: false
+  },
+  data: {
+    type: DataTypes.STRING(512),
+    allowNull: false
+  },
+  date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  // Options
+});
 // ========== Relationships ========== //
 
 Project.hasMany(Maintainer, {
@@ -160,6 +176,11 @@ module.exports.init = function() {
   }).then(() => {
     // remove old sessions
     return sequelize.query("DELETE FROM `sessions` WHERE `date` <= date('now','-30 day')", {
+      raw: true
+    });
+  }).then(() => {
+    // remove old tokens
+    return sequelize.query("DELETE FROM `tokens` WHERE `date` <= date('now','-30 day')", {
       raw: true
     });
   }).then(() => {
@@ -389,5 +410,12 @@ module.exports.removeProjectTodo = function(id) {
     where: {
       id: id
     }
+  });
+}
+
+module.exports.addToken = function(username, token) {
+  return Token.create({
+    username: username,
+    data: token
   });
 }
