@@ -6,7 +6,7 @@ const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const db = require('./data.js');
+const db = require('./db.js');
 const tanlist = require('./tan.js');
 const hash = require('./hash.js');
 

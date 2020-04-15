@@ -168,10 +168,10 @@ Project.hasMany(Todo, {
 });
 
 // ========== Functions ========== //
-module.exports.init = function() {
+function init() {
   return sequelize.authenticate().then(() => {
     return sequelize.sync({
-      alter: false
+      alter: true
     });
   }).then(() => {
     // remove old sessions
@@ -190,7 +190,7 @@ module.exports.init = function() {
   });
 }
 
-module.exports.auth = function(username, password) {
+function auth(username, password) {
   return User.findAndCountAll({
     where: {
       name: username,
@@ -201,7 +201,7 @@ module.exports.auth = function(username, password) {
   });
 };
 
-module.exports.createSession = function(username) {
+function createSession(username) {
   var sid = crypto.randomBytes(16).toString('hex');
   var token = crypto.randomBytes(16).toString('hex');
 
@@ -212,7 +212,7 @@ module.exports.createSession = function(username) {
   });
 };
 
-module.exports.authSession = function(username, sid, token) {
+function authSession(username, sid, token) {
   // find sessions
   return Session.findOne({
     where: {
@@ -246,7 +246,7 @@ module.exports.authSession = function(username, sid, token) {
   });
 };
 
-module.exports.deleteSession = function(username, sid) {
+function deleteSession(username, sid) {
   return Session.destroy({
     where: {
       username: username,
@@ -255,7 +255,7 @@ module.exports.deleteSession = function(username, sid) {
   });
 };
 
-module.exports.updateSession = function(username, sid) {
+function updateSession(username, sid) {
   return Session.destroy({
     where: {
       username: username,
@@ -264,7 +264,7 @@ module.exports.updateSession = function(username, sid) {
   });
 };
 
-module.exports.renameSession = function(old_username, new_username) {
+function renameSession(old_username, new_username) {
   return Session.update({
     username: new_username
   }, {
@@ -274,20 +274,20 @@ module.exports.renameSession = function(old_username, new_username) {
   });
 }
 
-module.exports.createUser = function(username, password) {
+function createUser(username, password) {
   return User.create({
     name: username,
     password: password
   });
 };
 
-module.exports.getUserList = function() {
+function getUserList() {
   return User.findAll({
     attributes: ['name', 'html']
   });
 }
 
-module.exports.getUserData = function(username) {
+function getUserData(username) {
   return User.findOne({
     where: {
       name: username
@@ -295,7 +295,7 @@ module.exports.getUserData = function(username) {
   });
 }
 
-module.exports.updateUser = function(username, field, value) {
+function updateUser(username, field, value) {
   return User.findOne({
     where: {
       name: username
@@ -306,7 +306,7 @@ module.exports.updateUser = function(username, field, value) {
   });
 }
 
-module.exports.deleteUser = function(username) {
+function deleteUser(username) {
   return User.findOne({
     where: {
       name: username
@@ -317,7 +317,7 @@ module.exports.deleteUser = function(username) {
   });
 }
 
-module.exports.exists = function(username) {
+function exists(username) {
   return User.count({
     where: {
       name: username
@@ -327,7 +327,7 @@ module.exports.exists = function(username) {
   });
 }
 
-module.exports.createLink = function(name, url, username) {
+function createLink(name, url, username) {
   return Link.create({
     name: name,
     url: url,
@@ -335,11 +335,11 @@ module.exports.createLink = function(name, url, username) {
   });
 }
 
-module.exports.getLinks = function() {
+function getLinks() {
   return Link.findAll();
 }
 
-module.exports.deleteLink = function(name, url) {
+function deleteLink(name, url) {
   return Link.destroy({
     where: {
       name: name,
@@ -348,7 +348,7 @@ module.exports.deleteLink = function(name, url) {
   });
 }
 
-module.exports.getProjects = function() {
+function getProjects() {
   return Project.findAll({
     include: [{
       model: Maintainer,
@@ -360,7 +360,7 @@ module.exports.getProjects = function() {
   });
 }
 
-module.exports.addProject = function(name, username) {
+function addProject(name, username) {
   return Project.create({
     name: name
   }).then((project) => {
@@ -371,7 +371,7 @@ module.exports.addProject = function(name, username) {
   });
 }
 
-module.exports.editProject = function(id, name, description) {
+function editProject(id, name, description) {
   return Project.update({
     name: name,
     description: description
@@ -382,14 +382,14 @@ module.exports.editProject = function(id, name, description) {
   });
 }
 
-module.exports.addProjectMaintainer = function(projectId, username) {
+function addProjectMaintainer(projectId, username) {
   return Maintainer.create({
     projectId: projectId,
     username: username
   });
 }
 
-module.exports.removeProject = function(projectId) {
+function removeProject(projectId) {
   return Project.destroy({
     where: {
       id: projectId
@@ -397,7 +397,7 @@ module.exports.removeProject = function(projectId) {
   });
 }
 
-module.exports.addProjectTodo = function(projectId, description, username) {
+function addProjectTodo(projectId, description, username) {
   return Todo.create({
     projectId: projectId,
     description: description,
@@ -405,7 +405,7 @@ module.exports.addProjectTodo = function(projectId, description, username) {
   });
 }
 
-module.exports.removeProjectTodo = function(id) {
+function removeProjectTodo(id) {
   return Todo.destroy({
     where: {
       id: id
@@ -413,7 +413,7 @@ module.exports.removeProjectTodo = function(id) {
   });
 }
 
-module.exports.addToken = function(username, token) {
+function addToken(username, token) {
   return Token.count({
     where: {
       username: username
@@ -433,3 +433,30 @@ module.exports.addToken = function(username, token) {
     });
   })
 }
+
+module.exports = {
+  init,
+  auth,
+  createSession,
+  authSession,
+  deleteSession,
+  updateSession,
+  renameSession,
+  createUser,
+  getUserList,
+  getUserData,
+  updateUser,
+  deleteUser,
+  exists,
+  createLink,
+  getLinks,
+  deleteLink,
+  getProjects,
+  addProject,
+  editProject,
+  addProjectMaintainer,
+  removeProject,
+  addProjectTodo,
+  removeProjectTodo,
+  addToken
+};
