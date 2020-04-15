@@ -22,7 +22,7 @@ const User = sequelize.define('user', {
     unique: true
   },
   password: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false,
     set(value) {
       this.setDataValue('password', hash.make(value));
@@ -49,15 +49,15 @@ const User = sequelize.define('user', {
 
 const Session = sequelize.define('session', {
   username: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(32),
     allowNull: false
   },
   sid: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   token: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   date: {
@@ -70,15 +70,15 @@ const Session = sequelize.define('session', {
 
 const Link = sequelize.define('link', {
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(32),
     allowNull: false
   },
   url: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(512),
     allowNull: false
   },
   username: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(32),
     allowNull: false
   },
   date: {
