@@ -10,21 +10,12 @@ const db = require('./db.js');
 const tanlist = require('./tan.js');
 const hash = require('./hash.js');
 const cookie = require('./cookie.js');
+const auth = require('./auth.js');
 
 const app = express();
 const waitForDBtoInit = db.init();
 
 const args = process.argv.slice(2);
-
-// ===== Helper functions ===== //
-function loggedin(req, res, url) {
-  if (req.session.loggedin) {
-    return true;
-  } else {
-    res.redirect(`/login?url=${url}`);
-    return false;
-  }
-}
 
 // ===== Express App ===== //
 app.use(session({
@@ -66,8 +57,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/login', function(req, res) {
-  var url = req.query.url;
-  url = url ? url : '/home';
+  var url = req.query.url ? req.query.url : '/home';
 
   if (req.session.loggedin) {
     res.redirect(`/${url}`);
@@ -124,7 +114,7 @@ app.get('/register', function(req, res) {
 });
 
 app.get('/home', function(req, res) {
-  if (!loggedin(req, res, 'home')) return;
+  if (!auth.auth.checkLogin(req, res, 'home')) return;
 
   db.getLinks().then((links) => {
     res.render('home', {
@@ -135,7 +125,7 @@ app.get('/home', function(req, res) {
 });
 
 app.get('/users', function(req, res) {
-  if (!loggedin(req, res, 'users')) return;
+  if (!auth.checkLogin(req, res, 'users')) return;
 
   db.getUserList().then((data) => {
     res.render('users', {
@@ -146,7 +136,7 @@ app.get('/users', function(req, res) {
 });
 
 app.get('/projects', function(req, res) {
-  if (!loggedin(req, res, 'projects')) return;
+  if (!auth.checkLogin(req, res, 'projects')) return;
 
   db.getProjects().then((data) => {
     res.render('projects', {
@@ -157,7 +147,7 @@ app.get('/projects', function(req, res) {
 });
 
 app.get('/links', function(req, res) {
-  if (!loggedin(req, res, 'links')) return;
+  if (!auth.checkLogin(req, res, 'links')) return;
 
   db.getLinks().then((data) => {
     return res.render('links', {
@@ -168,7 +158,7 @@ app.get('/links', function(req, res) {
 });
 
 app.get('/del-link', function(req, res) {
-  if (!loggedin(req, res, 'links')) return;
+  if (!auth.checkLogin(req, res, 'links')) return;
 
   var name = req.query.name;
   var url = req.query.url;
@@ -184,7 +174,7 @@ app.get('/del-link', function(req, res) {
 });
 
 app.get('/profile', function(req, res) {
-  if (!loggedin(req, res, 'profile')) return;
+  if (!auth.checkLogin(req, res, 'profile')) return;
 
   db.getUserData(req.session.username).then((data) => {
     res.render('profile', {
@@ -271,7 +261,7 @@ app.post('/register', function(req, res) {
 });
 
 app.post('/update-name', function(req, res) {
-  if (!loggedin(req, res, 'update-name')) return;
+  if (!auth.checkLogin(req, res, 'update-name')) return;
 
   var old_username = req.session.username;
   var new_username = req.body.username;
@@ -295,7 +285,7 @@ app.post('/update-name', function(req, res) {
 });
 
 app.post('/update-data', function(req, res) {
-  if (!loggedin(req, res, 'update-data')) return;
+  if (!auth.checkLogin(req, res, 'update-data')) return;
 
   var username = req.session.username;
   var new_data = req.body.data;
@@ -306,7 +296,7 @@ app.post('/update-data', function(req, res) {
 });
 
 app.post('/update-pswd', function(req, res) {
-  if (!loggedin(req, res, 'update-pswd')) return;
+  if (!auth.checkLogin(req, res, 'update-pswd')) return;
 
   var username = req.session.username;
   var old_password = req.body.password_old;
@@ -324,7 +314,7 @@ app.post('/update-pswd', function(req, res) {
 });
 
 app.post('/del-account', function(req, res) {
-  if (!loggedin(req, res, 'del-account')) return;
+  if (!auth.checkLogin(req, res, 'del-account')) return;
 
   var username = req.session.username;
   var password = req.body.password;
@@ -341,7 +331,7 @@ app.post('/del-account', function(req, res) {
 });
 
 app.post('/add-link', function(req, res) {
-  if (!loggedin(req, res, 'links')) return;
+  if (!auth.checkLogin(req, res, 'links')) return;
 
   var username = req.session.username;
   var name = req.body.name;
