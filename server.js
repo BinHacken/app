@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const db = require('./db.js');
 const tanlist = require('./tan.js');
 const hash = require('./hash.js');
+const cookie = require('./cookie.js');
 
 const app = express();
 const waitForDBtoInit = db.init();
@@ -16,7 +17,6 @@ const waitForDBtoInit = db.init();
 const args = process.argv.slice(2);
 
 // ===== Helper functions ===== //
-
 function loggedin(req, res, url) {
   if (req.session.loggedin) {
     return true;
@@ -24,52 +24,6 @@ function loggedin(req, res, url) {
     res.redirect(`/login?url=${url}`);
     return false;
   }
-}
-
-function deleteCookies(res) {
-  res.cookie('session.username', '', {
-    maxAge: 0
-  }).cookie('session.sid', '', {
-    maxAge: 0
-  }).cookie('session.token', '', {
-    maxAge: 0
-  });
-
-  console.log("Deleted cookies");
-}
-
-function getCookie(req) {
-  return {
-    username: req.signedCookies["session.username"],
-    sid: req.signedCookies["session.sid"],
-    token: req.signedCookies["session.token"]
-  };
-}
-
-function setCookie(res, data) {
-  if (data.username) {
-    res.cookie('session.username', data.username, {
-      signed: true,
-      maxAge: (30 * 24 * 60 * 60 * 1000)
-    });
-  }
-
-  if (data.sid) {
-    res.cookie('session.sid', data.sid, {
-      signed: true,
-      maxAge: (30 * 24 * 60 * 60 * 1000)
-    });
-  }
-
-  if (data.token) {
-    res.cookie('session.token', data.token, {
-      signed: true,
-      maxAge: (30 * 24 * 60 * 60 * 1000)
-    });
-  }
-
-  console.log('Set cookie ');
-  console.log(data);
 }
 
 // ===== Express App ===== //
@@ -120,7 +74,7 @@ app.get('/login', function(req, res) {
     return;
   }
 
-  var cookie = getCookie(req);
+  var _cookie = cookie.get(req);
 
   var renderPage = function() {
     res.render('login', {
@@ -130,7 +84,7 @@ app.get('/login', function(req, res) {
     });
   }
 
-  if (!cookie.username || !cookie.sid || !cookie.token) {
+  if (!_cookie.username || !_cookie.sid || !_cookie.token) {
     renderPage();
     return;
   }
@@ -141,25 +95,24 @@ app.get('/login', function(req, res) {
       "token": token
     });
   */
-  db.authSession(cookie.username, cookie.sid, cookie.token).then((session) => {
+  db.authSession(_cookie.username, _cookie.sid, _cookie.token).then((session) => {
     if (session && session.token) {
       console.log("Authenticated!");
       console.log(`Setting new token ${session.token}`);
 
-      setCookie(res, {
+      cookie.set(res, {
         token: session.token
       });
 
       req.session.loggedin = true;
-      req.session.username = cookie.username;
+      req.session.username = _cookie.username;
 
       res.redirect(`/${url}`);
     } else {
-      deleteCookies(res);
+      cookie.clear(res);
       renderPage();
     }
   });
-
 });
 
 app.get('/register', function(req, res) {
@@ -243,11 +196,11 @@ app.get('/profile', function(req, res) {
 });
 
 app.get('/logout', function(req, res) {
-  var cookie = getCookie(req);
+  var _cookie = cookie.get(req);
 
   req.session.destroy();
-  deleteCookies(res);
-  db.deleteSession(cookie.username, cookie.sid);
+  cookie.clear(res);
+  db.deleteSession(_cookie.username, _cookie.sid);
 
   res.redirect('/login');
 });
@@ -283,7 +236,7 @@ app.post('/auth', function(req, res) {
       req.session.username = username;
 
       db.createSession(username).then((user) => {
-        setCookie(res, {
+        cookie.set(res, {
           username: user.username,
           sid: user.sid,
           token: user.token
@@ -329,7 +282,7 @@ app.post('/update-name', function(req, res) {
   }).then(() => {
     req.session.username = new_username;
 
-    setCookie(res, {
+    cookie.set(res, {
       username: new_username
     });
 
