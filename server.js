@@ -7,10 +7,10 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const db = require('./db.js');
-const tanlist = require('./tan.js');
 const hash = require('./hash.js');
 const cookie = require('./cookie.js');
 const auth = require('./auth.js');
+const render = require('./render.js');
 
 const app = express();
 const waitForDBtoInit = db.init();
@@ -51,142 +51,56 @@ if (args.includes('https')) {
   httpsServer.listen(443);
 }
 
-// ===== GET Callbacks ===== //
+// ===== User ===== //
 app.get('/', function(req, res) {
   res.redirect('/home');
 });
 
+app.get('/home', function(req, res) {
+  if (!auth.checkLogin(req, res, 'home')) return;
+  render.home(req, res);
+});
+
 app.get('/login', function(req, res) {
-  var url = req.query.url ? req.query.url : '/home';
+  let url = req.query.url ? req.query.url : 'home';
 
-  if (req.session.loggedin) {
+  let success = () => {
     res.redirect(`/${url}`);
-    return;
-  }
+  };
 
-  var _cookie = cookie.get(req);
+  let fail = () => {
+    render.login(req, res);
+  };
 
-  var renderPage = function() {
-    res.render('login', {
-      nope: req.query.nope,
-      loggedin: req.session.loggedin,
-      url: url
-    });
-  }
-
-  if (!_cookie.username || !_cookie.sid || !_cookie.token) {
-    renderPage();
-    return;
-  }
-  /*
-    console.log({
-      "Username": username,
-      "sid": sid,
-      "token": token
-    });
-  */
-  db.authSession(_cookie.username, _cookie.sid, _cookie.token).then((session) => {
-    if (session && session.token) {
-      console.log("Authenticated!");
-      console.log(`Setting new token ${session.token}`);
-
-      cookie.set(res, {
-        token: session.token
-      });
-
-      req.session.loggedin = true;
-      req.session.username = _cookie.username;
-
-      res.redirect(`/${url}`);
-    } else {
-      cookie.clear(res);
-      renderPage();
-    }
-  });
+  auth.createSession(req, res).then(success).catch(fail);
 });
 
 app.get('/register', function(req, res) {
-  res.render('register', {
-    nope: req.query.nope,
-    loggedin: req.session.loggedin,
-    tan: req.query.tan
-  });
-});
-
-app.get('/home', function(req, res) {
-  if (!auth.checkLogin(req, res, 'home')) return;
-
-  db.getLinks().then((links) => {
-    res.render('home', {
-      loggedin: req.session.loggedin,
-      links: links
-    });
-  });
+  render.register(req, res);
 });
 
 app.get('/users', function(req, res) {
   if (!auth.checkLogin(req, res, 'users')) return;
-
-  db.getUserList().then((data) => {
-    res.render('users', {
-      loggedin: req.session.loggedin,
-      users: data
-    });
-  });
+  render.users(req, res);
 });
 
 app.get('/projects', function(req, res) {
   if (!auth.checkLogin(req, res, 'projects')) return;
-
-  db.getProjects().then((data) => {
-    res.render('projects', {
-      loggedin: req.session.loggedin,
-      projects: data
-    });
-  });
+  render.projects(req, res);
 });
 
 app.get('/links', function(req, res) {
   if (!auth.checkLogin(req, res, 'links')) return;
-
-  db.getLinks().then((data) => {
-    return res.render('links', {
-      loggedin: req.session.loggedin,
-      links: data
-    });
-  });
-});
-
-app.get('/del-link', function(req, res) {
-  if (!auth.checkLogin(req, res, 'links')) return;
-
-  var name = req.query.name;
-  var url = req.query.url;
-
-  console.log(name);
-  console.log(url);
-
-  db.deleteLink(name, url).then(() => {
-    res.redirect(`/links`);
-  }).catch(err => {
-    res.redirect('/links?nope=Something fucked up');
-  });
+  render.links(req, res);
 });
 
 app.get('/profile', function(req, res) {
   if (!auth.checkLogin(req, res, 'profile')) return;
-
-  db.getUserData(req.session.username).then((data) => {
-    res.render('profile', {
-      loggedin: req.session.loggedin,
-      user: data,
-      res: req.query.res
-    });
-  });
+  render.profile(req, res);
 });
 
 app.get('/logout', function(req, res) {
-  var _cookie = cookie.get(req);
+  let _cookie = cookie.get(req);
 
   req.session.destroy();
   cookie.clear(res);
@@ -195,8 +109,21 @@ app.get('/logout', function(req, res) {
   res.redirect('/login');
 });
 
-app.get('/token', function(req, res) {
+// ===== GET API ===== //
+app.get('/del-link', function(req, res) {
+  if (!auth.checkLogin(req, res, 'links')) return;
 
+  let name = req.query.name;
+  let url = req.query.url;
+
+  db.deleteLink(name, url).then(() => {
+    res.redirect(`/links`);
+  }).catch(err => {
+    res.redirect('/links?nope=Something fucked up');
+  });
+});
+
+app.get('/token', function(req, res) {
   if (!req.session.loggedin || !req.query.data) {
     res.status(404).send('File not found').end();
   } else {
@@ -206,140 +133,148 @@ app.get('/token', function(req, res) {
   }
 });
 
-// ===== POST Callbacks ===== //
+// ===== POST API ===== //
 app.post('/auth', function(req, res) {
-  var username = req.body.username;
-  var password = req.body.password;
-  var url = req.body.url;
-  url = url ? url : '/home';
+  let username = req.body.username;
+  let password = req.body.password;
+  let url = req.body.url ? req.body.url : 'home';
 
-  console.log('Login ');
+  let success = () => {
+    res.redirect(`/${url}`);
+  };
+
+  let fail = () => {
+    res.redirect(`/login?url=${url}&nope=Access denied : (`);
+  };
+
+  console.log('Login');
   console.log({
     username: username,
     password: '***',
     url: url
   });
 
-  db.auth(username, password).then((success) => {
-    if (success) {
-      req.session.loggedin = true;
-      req.session.username = username;
-
-      db.createSession(username).then((user) => {
-        cookie.set(res, {
-          username: user.username,
-          sid: user.sid,
-          token: user.token
-        });
-      }).then(() => {
-        res.redirect(`/${url}`);
-      });
-    } else {
-      res.redirect(`/login?url=${url}&nope=Access denied : (`);
-    }
-  });
+  auth.login(req, res, username, password).then(success).catch(fail);
 });
 
 app.post('/register', function(req, res) {
-  var username = req.body.username;
-  var password = req.body.password;
-  var tan = req.body.tan;
+  let username = req.body.username;
+  let password = req.body.password;
+  let tan = req.body.tan;
 
-  if (username && password && tanlist.check(tan)) {
-    console.log(`Register "${username}"`);
+  let success = () => {
+    res.redirect('/home');
+  };
 
-    db.createUser(username, password).then(() => {
-      req.session.loggedin = true;
-      req.session.username = username;
-      res.redirect('/home');
-    }).catch(err => {
-      res.redirect('/register?nope=Benutzername schon vergeben');
-    });
-  } else {
-    res.redirect('/register?nope=Falsche TAN');
-  }
+  let fail = (msg) => {
+    res.redirect(`/register?nope=${msg}`);
+  };
+
+  console.log(`Register "${username}"`);
+
+  auth.register(req, res, username, password, tan).then(success).catch(fail);
 });
 
 app.post('/update-name', function(req, res) {
   if (!auth.checkLogin(req, res, 'update-name')) return;
 
-  var old_username = req.session.username;
-  var new_username = req.body.username;
+  let old_username = req.session.username;
+  let new_username = req.body.username;
 
-  db.exists(new_username).then((exists) => {
-    if (!exists) return db.updateUser(old_username, 'name', new_username);
-    else throw new Error('Benutzername schon vergebem');
-  }).then(() => {
-    req.session.username = new_username;
+  let success = () => {
+    res.redirect(`/profile?res=Benutzername geändert zu ${new_username}`);
+  };
 
-    cookie.set(res, {
-      username: new_username
-    });
-
-    return db.renameSession(old_username, new_username);
-  }).then(() => {
-    res.redirect(`/profile?res=Benutzername geändert zu $ {new_username}`);
-  }).catch((msg) => {
+  let fail = (msg) => {
     res.redirect(`/profile?res=${msg}`);
-  });
+  };
+
+  auth.rename(req, res, old_username, new_username).then(success).catch(fail);
 });
 
 app.post('/update-data', function(req, res) {
   if (!auth.checkLogin(req, res, 'update-data')) return;
 
-  var username = req.session.username;
-  var new_data = req.body.data;
+  let username = req.session.username;
+  let new_data = req.body.data;
 
-  db.updateUser(username, 'data', new_data).then(() => {
+  let success = () => {
     res.redirect(`/profile?res=Beschreibung geändert`);
-  });
+  };
+
+  let fail = (msg) => {
+    res.redirect(`/profile?res=Da ist etwas schief gelaufen (${msg})`);
+  };
+
+  db.updateUser(username, 'data', new_data).then(success).catch(fail);
 });
 
 app.post('/update-pswd', function(req, res) {
   if (!auth.checkLogin(req, res, 'update-pswd')) return;
 
-  var username = req.session.username;
-  var old_password = req.body.password_old;
-  var new_password = req.body.password_new;
+  let username = req.session.username;
+  let old_password = req.body.password_old;
+  let new_password = req.body.password_new;
 
-  db.getUserData(username).then((data) => {
-    if (hash.compare(old_password, data.password)) {
-      db.updateUser(username, 'password', new_password).then(() => {
-        res.redirect(`/profile?res=Passwort geändert`);
-      });
-    } else {
-      res.redirect(`/profile?res=Falsches Passwort`);
-    }
-  });
+  let success = () => {
+    res.redirect(`/profile?res=Passwort geändert`);
+  };
+
+  let fail = (msg) => {
+    res.redirect(`/profile?res=${msg}`);
+  };
+
+  db.getUserData(username).then((current) => {
+    if (!hash.compare(old_password, current.password)) {
+      throw new Error('Falsches Passwort');
+    };
+  }).then(() => {
+    db.updateUser(username, 'password', new_password);
+  }).then(success).catch(fail);
 });
 
 app.post('/del-account', function(req, res) {
   if (!auth.checkLogin(req, res, 'del-account')) return;
 
-  var username = req.session.username;
-  var password = req.body.password;
+  let username = req.session.username;
+  let password = req.body.password;
 
-  db.getUserData(username).then((data) => {
-    if (hash.compare(password, data.password)) {
-      db.deleteUser(username).then(() => {
-        res.redirect(`/logout`);
-      });
-    } else {
-      res.redirect(`/profile?res=Falsches Passwort`);
-    }
-  });
+  let success = () => {
+    res.redirect(`/logout`);
+  };
+
+  let fail = (msg) => {
+    res.redirect(`/profile?res=${msg}`);
+  };
+
+  db.getUserData(username).then((current) => {
+    if (!hash.compare(password, current.password)) {
+      throw new Error('Falsches Passwort');
+    };
+  }).then(() => {
+    db.deleteUser(username);
+  }).then(success).catch(fail);
 });
 
 app.post('/add-link', function(req, res) {
   if (!auth.checkLogin(req, res, 'links')) return;
 
-  var username = req.session.username;
-  var name = req.body.name;
-  var url = req.body.url;
+  let username = req.session.username;
+  let name = req.body.name;
+  let url = req.body.url;
 
-  db.createLink(name, url, username).then(() => {
+  let success = () => {
     res.redirect('/links');
-  }).catch(err => {
-    res.redirect('/links?nope=Something fucked up');
-  });
+  };
+
+  let fail = (msg) => {
+    res.redirect(`/links?nope=${msg}`);
+  };
+
+  db.createLink(name, url, username).then(success).catch(fail);
+});
+
+// ===== 404 ===== //
+app.get('*', function(req, res) {
+  res.status(404).send('File not found').end();
 });
