@@ -114,7 +114,7 @@ app.get('/register', function(req, res) {
 });
 
 app.get('/home', function(req, res) {
-  if (!auth.auth.checkLogin(req, res, 'home')) return;
+  if (!auth.checkLogin(req, res, 'home')) return;
 
   db.getLinks().then((links) => {
     res.render('home', {
