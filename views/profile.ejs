@@ -11,6 +11,14 @@
   </header>
 
   <div class="container">
+    <section id="res">
+      <p>
+        <% if(res) { %>
+        <%= res %>
+        <% } %>
+      </p>
+    </section>
+
     <section>
       <form method="post" action="update-name">
         <input type="text" name="username" value="<%= user.name %>" maxlength="32" required>
@@ -38,14 +46,6 @@
         <input type="password" placeholder="Passwort" name="password" required>
         <button type="submit" class="danger">Account dauerhaft löschen</button>
       </form>
-    </section>
-
-    <section id="res">
-      <p>
-        <% if(res) { %>
-        <%= res %>
-        <% } %>
-      </p>
     </section>
   </div>
 </body>
