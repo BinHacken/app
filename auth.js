@@ -1,5 +1,4 @@
 const db = require('./db.js');
-const hash = require('./hash.js');
 const cookie = require('./cookie.js');
 const tanlist = require('./tan.js');
 
@@ -12,21 +11,30 @@ function checkLogin(req, res, url) {
   }
 }
 
-function createSession(req, res) {
+function startSession(req, res) {
   return new Promise((resolve, reject) => {
+    console.log("Start session...");
+
     if (req.session.loggedin) {
+      console.log('Already logged in');
       resolve();
       return;
     }
 
     var _cookie = cookie.get(req);
 
-    if (!_cookie.username || !_cookie.sid || !_cookie.token) {
-      reject();
+    if (!_cookie.sid && !_cookie.token && !_cookie.userId) {
+      console.log('No session cookie found');
+      reject(new Error('No session cookie found'));
+      return;
+    } else if (!_cookie.sid || !_cookie.token || !_cookie.userId) {
+      console.log('Corrupted session cookie :(');
+      cookie.clear(res);
+      reject(new Error('Corrupted session cookie :('));
       return;
     }
 
-    db.authSession(_cookie.username, _cookie.sid, _cookie.token).then((session) => {
+    db.authSession(_cookie.sid, _cookie.token, _cookie.userId).then((session) => {
       if (session && session.token) {
         console.log("Authenticated!");
         console.log(`Setting new token ${session.token}`);
@@ -36,30 +44,34 @@ function createSession(req, res) {
         });
 
         req.session.loggedin = true;
-        req.session.username = _cookie.username
+        req.session.userId = _cookie.userId
       } else {
+        console.log('Corrupted session cookie :(');
         cookie.clear(res);
-        throw new Error('Benutzername schon vergeben');
+        throw new Error('Corrupted session cookie :(');
       }
     }).then(resolve).catch(reject);
   });
 }
 
 function login(req, res, username, password) {
-  return db.auth(username, password).then((ok) => {
-    if (ok) {
+  return db.getUser({
+    'name': username,
+    'password_old': password
+  }).then(user => {
+    if (user) {
       req.session.loggedin = true;
-      req.session.username = username;
+      req.session.userId = user.id;
+
+      return db.createSession(user.id);
     } else {
-      throw new Error('Benutzername schon vergeben');
+      throw new Error('Benutzername oder Passwort falsch');
     }
-  }).then(() => {
-    return db.createSession(username);
-  }).then((user) => {
+  }).then(session => {
     cookie.set(res, {
-      username: user.username,
-      sid: user.sid,
-      token: user.token
+      sid: session.sid,
+      token: session.token,
+      userId: session.userId
     });
   });
 }
@@ -74,41 +86,36 @@ function register(req, res, username, password, tan) {
       resolve();
     }
   }).then(() => {
-    return db.getUserData(username);
+    return db.getUser({
+      'name': username
+    });
   }).then((user) => {
     if (user) {
       throw new Error('Benutzername schon vergeben');
+    } else {
+      return db.createUser(username, password);
     }
-  }).then(() => {
-    db.createUser(username, password);
-  }).then(() => {
+  }).then(user => {
     req.session.loggedin = true;
-    req.session.username = username;
+    req.session.userId = user.id;
   });
 }
 
-function rename(req, res, old_username, new_username) {
-  return db.exists(new_username).then((existing) => {
-    if (existing) {
-      console.log("")
+function rename(req, res, userId, new_username) {
+  return db.getUser({
+    'name': new_username
+  }).then(user => {
+    if (user) {
       throw new Error('Benutzername schon vergeben');
+    } else {
+      return db.updateUser(userId, 'name', new_username);
     }
-  }).then(() => {
-    db.updateUser(old_username, 'name', new_username);
-  }).then(() => {
-    req.session.username = new_username;
-
-    cookie.set(res, {
-      username: new_username
-    });
-
-    db.renameSession(old_username, new_username);
   });
 }
 
 module.exports = {
   checkLogin,
-  createSession,
+  startSession,
   login,
   register,
   rename

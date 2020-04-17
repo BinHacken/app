@@ -56,7 +56,9 @@ function links(req, res) {
 }
 
 function profile(req, res) {
-  db.getUserData(req.session.username).then((data) => {
+  db.getUser({
+    'id': req.session.userId
+  }).then((data) => {
     res.render('profile', {
       loggedin: req.session.loggedin,
       user: data,

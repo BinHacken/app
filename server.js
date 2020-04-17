@@ -7,15 +7,14 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const db = require('./db.js');
-const hash = require('./hash.js');
 const cookie = require('./cookie.js');
 const auth = require('./auth.js');
 const render = require('./render.js');
 
-const app = express();
-const waitForDBtoInit = db.init();
-
 const args = process.argv.slice(2);
+
+const app = express();
+const waitForDBtoInit = db.init(args.includes('alter'));
 
 // ===== Express App ===== //
 app.use(session({
@@ -64,15 +63,11 @@ app.get('/home', function(req, res) {
 app.get('/login', function(req, res) {
   let url = req.query.url ? req.query.url : 'home';
 
-  let success = () => {
+  auth.startSession(req, res).then(() => {
     res.redirect(`/${url}`);
-  };
-
-  let fail = () => {
+  }).catch(() => {
     render.login(req, res);
-  };
-
-  auth.createSession(req, res).then(success).catch(fail);
+  });
 });
 
 app.get('/register', function(req, res) {
@@ -104,7 +99,7 @@ app.get('/logout', function(req, res) {
 
   req.session.destroy();
   cookie.clear(res);
-  db.deleteSession(_cookie.username, _cookie.sid);
+  db.deleteSession(_cookie.sid, _cookie.userId);
 
   res.redirect('/login');
 });
@@ -127,7 +122,7 @@ app.get('/token', function(req, res) {
   if (!req.session.loggedin || !req.query.data) {
     res.status(404).send('File not found').end();
   } else {
-    db.addToken(req.session.username, req.query.data).then(() => {
+    db.createToken(req.session.userId, req.query.data).then(() => {
       res.status(200).send('OK').end();
     });
   }
@@ -161,6 +156,8 @@ app.post('/register', function(req, res) {
   console.log(`Register "${username}"`);
 
   auth.register(req, res, username, password, tan).then(() => {
+    return auth.login(req, res, username, password);
+  }).then(() => {
     res.redirect('/home');
   }).catch((msg) => {
     res.redirect(`/register?nope=${msg}`);
@@ -170,10 +167,9 @@ app.post('/register', function(req, res) {
 app.post('/update-name', function(req, res) {
   if (!auth.checkLogin(req, res, 'update-name')) return;
 
-  let old_username = req.session.username;
   let new_username = req.body.username;
 
-  auth.rename(req, res, old_username, new_username).then(() => {
+  auth.rename(req, res, req.session.userId, new_username).then(() => {
     res.redirect(`/profile?res=Benutzername geändert zu ${new_username}`);
   }).catch((msg) => {
     res.redirect(`/profile?res=${msg}`);
@@ -183,10 +179,9 @@ app.post('/update-name', function(req, res) {
 app.post('/update-data', function(req, res) {
   if (!auth.checkLogin(req, res, 'update-data')) return;
 
-  let username = req.session.username;
   let new_data = req.body.data;
 
-  db.updateUser(username, 'data', new_data).then(() => {
+  db.updateUser(req.session.userId, 'data', new_data).then(() => {
     res.redirect(`/profile?res=Beschreibung geändert`);
   }).catch((msg) => {
     res.redirect(`/profile?res=Da ist etwas schief gelaufen (${msg})`);
@@ -196,16 +191,18 @@ app.post('/update-data', function(req, res) {
 app.post('/update-pswd', function(req, res) {
   if (!auth.checkLogin(req, res, 'update-pswd')) return;
 
-  let username = req.session.username;
   let old_password = req.body.password_old;
   let new_password = req.body.password_new;
 
-  db.getUserData(username).then((current) => {
-    if (!hash.compare(old_password, current.password)) {
+  db.getUser({
+    'id': req.session.userId,
+    'password': old_password
+  }).then(user => {
+    if (user) {
+      db.updateUser(req.session.userId, 'password', new_password);
+    } else {
       throw new Error('Falsches Passwort');
     };
-  }).then(() => {
-    db.updateUser(username, 'password', new_password);
   }).then(() => {
     res.redirect(`/profile?res=Passwort geändert`);
   }).catch((msg) => {
@@ -216,15 +213,17 @@ app.post('/update-pswd', function(req, res) {
 app.post('/del-account', function(req, res) {
   if (!auth.checkLogin(req, res, 'del-account')) return;
 
-  let username = req.session.username;
   let password = req.body.password;
 
-  db.getUserData(username).then((current) => {
-    if (!hash.compare(password, current.password)) {
+  db.getUser({
+    'id': req.session.userId,
+    'password': password
+  }).then(user => {
+    if (user) {
+      db.deleteUser(user.id);
+    } else {
       throw new Error('Falsches Passwort');
     };
-  }).then(() => {
-    db.deleteUser(username);
   }).then(() => {
     res.redirect(`/logout`);
   }).catch((msg) => {
@@ -235,11 +234,10 @@ app.post('/del-account', function(req, res) {
 app.post('/add-link', function(req, res) {
   if (!auth.checkLogin(req, res, 'links')) return;
 
-  let username = req.session.username;
   let name = req.body.name;
   let url = req.body.url;
 
-  db.createLink(name, url, username).then(success = () => {
+  db.createLink(name, url, req.session.userId).then(success = () => {
     res.redirect('/links');
   }).catch((msg) => {
     res.redirect(`/links?nope=${msg}`);

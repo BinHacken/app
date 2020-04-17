@@ -48,10 +48,6 @@ const User = sequelize.define('user', {
 });
 
 const Session = sequelize.define('session', {
-  username: {
-    type: DataTypes.STRING(32),
-    allowNull: false
-  },
   sid: {
     type: DataTypes.STRING(255),
     allowNull: false
@@ -75,10 +71,6 @@ const Link = sequelize.define('link', {
   },
   url: {
     type: DataTypes.STRING(512),
-    allowNull: false
-  },
-  username: {
-    type: DataTypes.STRING(32),
     allowNull: false
   },
   date: {
@@ -113,22 +105,9 @@ const Project = sequelize.define('project', {
   // Options
 });
 
-const Maintainer = sequelize.define('maintainer', {
-  username: {
-    type: DataTypes.STRING(32),
-    allowNull: false
-  }
-}, {
-  // Options
-});
-
 const Todo = sequelize.define('todo', {
   description: {
     type: DataTypes.STRING(512),
-    allowNull: false
-  },
-  username: {
-    type: DataTypes.STRING(32),
     allowNull: false
   },
   date: {
@@ -140,10 +119,6 @@ const Todo = sequelize.define('todo', {
 });
 
 const Token = sequelize.define('token', {
-  username: {
-    type: DataTypes.STRING(32),
-    allowNull: false
-  },
   data: {
     type: DataTypes.STRING(255),
     allowNull: false
@@ -157,21 +132,50 @@ const Token = sequelize.define('token', {
 });
 // ========== Relationships ========== //
 
-Project.hasMany(Maintainer, {
-  as: 'maintainers',
+User.hasMany(Session, {
+  as: 'sessions',
+  onDelete: 'CASCADE'
+});
+Session.belongsTo(User);
+
+User.hasMany(Link, {
+  as: 'links',
   onDelete: 'SET NULL'
+});
+Link.belongsTo(User);
+
+User.hasMany(Token, {
+  as: 'tokens',
+  onDelete: 'CASCADE'
+});
+Token.belongsTo(User);
+
+Project.belongsToMany(User, {
+  through: 'ProjectMaintainers',
+  as: 'maintainers'
+});
+User.belongsToMany(Project, {
+  through: 'ProjectMaintainers',
+  as: 'projects'
 });
 
 Project.hasMany(Todo, {
   as: 'todos',
   onDelete: 'SET NULL'
 });
+Todo.belongsTo(Project);
+
+Todo.belongsTo(User);
+User.hasMany(Todo, {
+  as: 'todos',
+  onDelete: 'SET NULL'
+});
 
 // ========== Functions ========== //
-function init() {
+function init(alter) {
   return sequelize.authenticate().then(() => {
     return sequelize.sync({
-      alter: true
+      alter: alter
     });
   }).then(() => {
     // remove old sessions
@@ -190,35 +194,88 @@ function init() {
   });
 }
 
-function auth(username, password) {
-  return User.findAndCountAll({
-    where: {
-      name: username,
-      password: hash.make(password)
-    }
-  }).then(result => {
-    return (result.count > 0);
+// ===== User ===== //
+function createUser(username, password) {
+  return User.create({
+    name: username,
+    password: password
   });
 };
 
-function createSession(username) {
+function getUser(data) {
+  if (data['id'] && data['password']) {
+    return User.findOne({
+      where: {
+        id: data['id'],
+        password: hash.make(data['password'])
+      }
+    });
+  } else if (data['name'] && data['password']) {
+    return User.findOne({
+      where: {
+        name: data['name'],
+        password: hash.make(data['password'])
+      }
+    });
+  } else if (data['id']) {
+    return User.findOne({
+      where: {
+        id: data['id']
+      }
+    });
+
+  } else if (data['name']) {
+    return User.findOne({
+      where: {
+        name: data['name']
+      }
+    });
+  }
+}
+
+function getUserList() {
+  return User.findAll({
+    attributes: ['name', 'html']
+  });
+}
+
+function updateUser(userId, field, value) {
+  return getUser({
+    'id': userId
+  }).then(user => {
+    user.set(field, value);
+    return user.save();
+  });
+}
+
+function deleteUser(userId) {
+  return User.destroy({
+    where: {
+      id: userId
+    }
+  });
+}
+
+// ===== Session ===== //
+
+function createSession(userId) {
   var sid = crypto.randomBytes(16).toString('hex');
   var token = crypto.randomBytes(16).toString('hex');
 
   return Session.create({
-    username: username,
     sid: sid,
-    token: token
+    token: token,
+    userId: userId
   });
 };
 
-function authSession(username, sid, token) {
+function authSession(sid, token, userId) {
   // find sessions
   return Session.findOne({
     where: {
-      username: username,
       sid: sid,
-      token: token
+      token: token,
+      userId: userId
     }
   }).then((session) => {
     // found => update token
@@ -246,92 +303,21 @@ function authSession(username, sid, token) {
   });
 };
 
-function deleteSession(username, sid) {
+function deleteSession(sid, userId) {
   return Session.destroy({
     where: {
-      username: username,
-      sid: sid
+      sid: sid,
+      userId: userId
     }
   });
 };
 
-function updateSession(username, sid) {
-  return Session.destroy({
-    where: {
-      username: username,
-      sid: sid
-    }
-  });
-};
-
-function renameSession(old_username, new_username) {
-  return Session.update({
-    username: new_username
-  }, {
-    where: {
-      username: old_username
-    }
-  });
-}
-
-function createUser(username, password) {
-  return User.create({
-    name: username,
-    password: password
-  });
-};
-
-function getUserList() {
-  return User.findAll({
-    attributes: ['name', 'html']
-  });
-}
-
-function getUserData(username) {
-  return User.findOne({
-    where: {
-      name: username
-    }
-  });
-}
-
-function updateUser(username, field, value) {
-  return User.findOne({
-    where: {
-      name: username
-    }
-  }).then((user) => {
-    user.set(field, value);
-    return user.save();
-  });
-}
-
-function deleteUser(username) {
-  return User.findOne({
-    where: {
-      name: username
-    }
-  }).then((user) => {
-    user.destroy();
-    return user.save();
-  });
-}
-
-function exists(username) {
-  return User.count({
-    where: {
-      name: username
-    }
-  }).then(count => {
-    return count > 0;
-  });
-}
-
-function createLink(name, url, username) {
+// ===== Link ===== //
+function createLink(name, url, userId) {
   return Link.create({
     name: name,
     url: url,
-    username: username
+    userId: userId
   });
 }
 
@@ -348,26 +334,32 @@ function deleteLink(name, url) {
   });
 }
 
+// ===== Project ====== //
+
+function createProject(name, userId) {
+  return Project.create({
+    where: {
+      name: name
+    },
+    include: User
+  }).then(project => {
+    return project.maintainers.findOrCreate({
+      where: {
+        userId: userId
+      }
+    });
+  });
+}
+
 function getProjects() {
   return Project.findAll({
     include: [{
-      model: Maintainer,
+      model: User,
       as: 'maintainers'
     }, {
       model: Todo,
       as: 'todos'
     }]
-  });
-}
-
-function addProject(name, username) {
-  return Project.create({
-    name: name
-  }).then((project) => {
-    return Maintainer.create({
-      projectId: project.id,
-      username: username
-    });
   });
 }
 
@@ -382,14 +374,26 @@ function editProject(id, name, description) {
   });
 }
 
-function addProjectMaintainer(projectId, username) {
-  return Maintainer.create({
-    projectId: projectId,
-    username: username
+function createMaintainer(projectId, userId) {
+  return Project.findOne({
+    where: {
+      projectId: projectId
+    },
+    include: User
+  }).then(project => {
+    if (project) {
+      return project.maintainers.findOrCreate({
+        where: {
+          userId: userId
+        }
+      });
+    } else {
+      throw new console.error("Project nicht gefunden");
+    }
   });
 }
 
-function removeProject(projectId) {
+function deleteProject(projectId) {
   return Project.destroy({
     where: {
       id: projectId
@@ -397,66 +401,62 @@ function removeProject(projectId) {
   });
 }
 
-function addProjectTodo(projectId, description, username) {
+function createTodo(projectId, description, userId) {
   return Todo.create({
-    projectId: projectId,
     description: description,
-    username: username
+    projectId: projectId,
+    userId: userId
   });
 }
 
-function removeProjectTodo(id) {
+function deleteProjectTodo(todoId) {
   return Todo.destroy({
     where: {
-      id: id
+      id: todoId
     }
   });
 }
 
-function addToken(username, token) {
+function createToken(userId, token) {
   return Token.count({
     where: {
-      username: username
+      userId: userId
     }
   }).then(result => {
     if (result > 150) {
       Token.destroy({
         where: {
-          username: username
+          userId: userId
         }
       });
     }
   }).then(() => {
     return Token.create({
-      username: username,
-      data: token
+      data: token,
+      userId: userId
     });
   })
 }
 
 module.exports = {
   init,
-  auth,
+  createUser,
+  getUser,
+  getUserList,
+  updateUser,
+  deleteUser,
   createSession,
   authSession,
   deleteSession,
-  updateSession,
-  renameSession,
-  createUser,
-  getUserList,
-  getUserData,
-  updateUser,
-  deleteUser,
-  exists,
   createLink,
   getLinks,
   deleteLink,
+  createProject,
   getProjects,
-  addProject,
   editProject,
-  addProjectMaintainer,
-  removeProject,
-  addProjectTodo,
-  removeProjectTodo,
-  addToken
+  createMaintainer,
+  deleteProject,
+  createTodo,
+  deleteProjectTodo,
+  createToken
 };
