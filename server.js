@@ -139,14 +139,6 @@ app.post('/auth', function(req, res) {
   let password = req.body.password;
   let url = req.body.url ? req.body.url : 'home';
 
-  let success = () => {
-    res.redirect(`/${url}`);
-  };
-
-  let fail = () => {
-    res.redirect(`/login?url=${url}&nope=Access denied : (`);
-  };
-
   console.log('Login');
   console.log({
     username: username,
@@ -154,7 +146,11 @@ app.post('/auth', function(req, res) {
     url: url
   });
 
-  auth.login(req, res, username, password).then(success).catch(fail);
+  auth.login(req, res, username, password).then(() => {
+    res.redirect(`/${url}`);
+  }).catch(() => {
+    res.redirect(`/login?url=${url}&nope=Access denied : (`);
+  });
 });
 
 app.post('/register', function(req, res) {
@@ -162,17 +158,13 @@ app.post('/register', function(req, res) {
   let password = req.body.password;
   let tan = req.body.tan;
 
-  let success = () => {
-    res.redirect('/home');
-  };
-
-  let fail = (msg) => {
-    res.redirect(`/register?nope=${msg}`);
-  };
-
   console.log(`Register "${username}"`);
 
-  auth.register(req, res, username, password, tan).then(success).catch(fail);
+  auth.register(req, res, username, password, tan).then(() => {
+    res.redirect('/home');
+  }).catch((msg) => {
+    res.redirect(`/register?nope=${msg}`);
+  });
 });
 
 app.post('/update-name', function(req, res) {
@@ -181,15 +173,11 @@ app.post('/update-name', function(req, res) {
   let old_username = req.session.username;
   let new_username = req.body.username;
 
-  let success = () => {
+  auth.rename(req, res, old_username, new_username).then(() => {
     res.redirect(`/profile?res=Benutzername geändert zu ${new_username}`);
-  };
-
-  let fail = (msg) => {
+  }).catch((msg) => {
     res.redirect(`/profile?res=${msg}`);
-  };
-
-  auth.rename(req, res, old_username, new_username).then(success).catch(fail);
+  });
 });
 
 app.post('/update-data', function(req, res) {
@@ -198,15 +186,11 @@ app.post('/update-data', function(req, res) {
   let username = req.session.username;
   let new_data = req.body.data;
 
-  let success = () => {
+  db.updateUser(username, 'data', new_data).then(() => {
     res.redirect(`/profile?res=Beschreibung geändert`);
-  };
-
-  let fail = (msg) => {
+  }).catch((msg) => {
     res.redirect(`/profile?res=Da ist etwas schief gelaufen (${msg})`);
-  };
-
-  db.updateUser(username, 'data', new_data).then(success).catch(fail);
+  });
 });
 
 app.post('/update-pswd', function(req, res) {
@@ -216,21 +200,17 @@ app.post('/update-pswd', function(req, res) {
   let old_password = req.body.password_old;
   let new_password = req.body.password_new;
 
-  let success = () => {
-    res.redirect(`/profile?res=Passwort geändert`);
-  };
-
-  let fail = (msg) => {
-    res.redirect(`/profile?res=${msg}`);
-  };
-
   db.getUserData(username).then((current) => {
     if (!hash.compare(old_password, current.password)) {
       throw new Error('Falsches Passwort');
     };
   }).then(() => {
     db.updateUser(username, 'password', new_password);
-  }).then(success).catch(fail);
+  }).then(() => {
+    res.redirect(`/profile?res=Passwort geändert`);
+  }).catch((msg) => {
+    res.redirect(`/profile?res=${msg}`);
+  });
 });
 
 app.post('/del-account', function(req, res) {
@@ -239,21 +219,17 @@ app.post('/del-account', function(req, res) {
   let username = req.session.username;
   let password = req.body.password;
 
-  let success = () => {
-    res.redirect(`/logout`);
-  };
-
-  let fail = (msg) => {
-    res.redirect(`/profile?res=${msg}`);
-  };
-
   db.getUserData(username).then((current) => {
     if (!hash.compare(password, current.password)) {
       throw new Error('Falsches Passwort');
     };
   }).then(() => {
     db.deleteUser(username);
-  }).then(success).catch(fail);
+  }).then(() => {
+    res.redirect(`/logout`);
+  }).catch((msg) => {
+    res.redirect(`/profile?res=${msg}`);
+  });
 });
 
 app.post('/add-link', function(req, res) {
@@ -263,15 +239,11 @@ app.post('/add-link', function(req, res) {
   let name = req.body.name;
   let url = req.body.url;
 
-  let success = () => {
+  db.createLink(name, url, username).then(success = () => {
     res.redirect('/links');
-  };
-
-  let fail = (msg) => {
+  }).catch((msg) => {
     res.redirect(`/links?nope=${msg}`);
-  };
-
-  db.createLink(name, url, username).then(success).catch(fail);
+  });
 });
 
 // ===== 404 ===== //
