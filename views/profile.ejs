@@ -21,14 +21,14 @@
 
     <section>
       <form method="post" action="update-name">
-        <input type="text" name="username" value="<%= user.name %>" maxlength="32" required>
+        <input type="text" name="username" value="<%= user.name %>" minlegth="1" maxlength="32" required>
         <button type="submit" class="primary">Benutzername ändern</button>
       </form>
     </section>
 
     <section>
       <form method="post" action="update-data">
-        <textarea name="data" rows="8" cols="80" maxlength="2048"><%= user.data %></textarea>
+        <textarea name="data" rows="8" cols="80" minlegth="1" maxlength="2048"><%= user.data %></textarea>
         <button type="submit" class="primary">Beschreibung ändern</button>
       </form>
     </section>

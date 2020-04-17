@@ -38,10 +38,11 @@ function users(req, res) {
 }
 
 function projects(req, res) {
-  db.getProjects().then((data) => {
+  db.getProjectList().then((data) => {
     res.render('projects', {
       loggedin: req.session.loggedin,
-      projects: data
+      projects: data,
+      res: req.query.res
     });
   });
 }
@@ -50,7 +51,8 @@ function links(req, res) {
   db.getLinks().then((data) => {
     return res.render('links', {
       loggedin: req.session.loggedin,
-      links: data
+      links: data,
+      res: req.query.res
     });
   });
 }

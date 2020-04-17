@@ -44,7 +44,7 @@ const User = sequelize.define('user', {
     }
   }
 }, {
-  // Options
+  timestamps: false
 });
 
 const Session = sequelize.define('session', {
@@ -61,7 +61,7 @@ const Session = sequelize.define('session', {
     defaultValue: DataTypes.NOW
   }
 }, {
-  // Options
+  timestamps: false
 });
 
 const Link = sequelize.define('link', {
@@ -78,7 +78,7 @@ const Link = sequelize.define('link', {
     defaultValue: DataTypes.NOW
   }
 }, {
-  // Options
+  timestamps: false
 });
 
 const Project = sequelize.define('project', {
@@ -102,7 +102,11 @@ const Project = sequelize.define('project', {
     }
   }
 }, {
-  // Options
+  timestamps: false
+});
+
+const ProjectMaintainers = sequelize.define('ProjectMaintainers', {}, {
+  timestamps: false
 });
 
 const Todo = sequelize.define('todo', {
@@ -115,7 +119,7 @@ const Todo = sequelize.define('todo', {
     defaultValue: DataTypes.NOW
   }
 }, {
-  // Options
+  timestamps: false
 });
 
 const Token = sequelize.define('token', {
@@ -128,7 +132,7 @@ const Token = sequelize.define('token', {
     defaultValue: DataTypes.NOW
   }
 }, {
-  // Options
+  timestamps: false
 });
 // ========== Relationships ========== //
 
@@ -336,22 +340,43 @@ function deleteLink(name, url) {
 
 // ===== Project ====== //
 
-function createProject(name, userId) {
+function createProject(name) {
   return Project.create({
-    where: {
-      name: name
-    },
-    include: User
-  }).then(project => {
-    return project.maintainers.findOrCreate({
-      where: {
-        userId: userId
-      }
-    });
+    name: name
   });
 }
 
-function getProjects() {
+function getProject(data) {
+  if (data['name']) {
+    return Project.findOne({
+      where: {
+        name: data['name']
+      },
+      include: [{
+        model: User,
+        as: 'maintainers'
+      }, {
+        model: Todo,
+        as: 'todos'
+      }]
+    });
+  } else if (data['id']) {
+    return Project.findOne({
+      where: {
+        id: data['id']
+      },
+      include: [{
+        model: User,
+        as: 'maintainers'
+      }, {
+        model: Todo,
+        as: 'todos'
+      }]
+    });
+  }
+}
+
+function getProjectList() {
   return Project.findAll({
     include: [{
       model: User,
@@ -375,21 +400,9 @@ function editProject(id, name, description) {
 }
 
 function createMaintainer(projectId, userId) {
-  return Project.findOne({
-    where: {
-      projectId: projectId
-    },
-    include: User
-  }).then(project => {
-    if (project) {
-      return project.maintainers.findOrCreate({
-        where: {
-          userId: userId
-        }
-      });
-    } else {
-      throw new console.error("Project nicht gefunden");
-    }
+  return ProjectMaintainers.create({
+    projectId: projectId,
+    userId: userId
   });
 }
 
@@ -452,7 +465,8 @@ module.exports = {
   getLinks,
   deleteLink,
   createProject,
-  getProjects,
+  getProject,
+  getProjectList,
   editProject,
   createMaintainer,
   deleteProject,

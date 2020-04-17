@@ -108,7 +108,7 @@ app.get('/logout', function(req, res) {
 app.get('/del-link', function(req, res) {
   if (!auth.checkLogin(req, res, 'links')) return;
 
-  let name = req.query.name;
+  let name = req.query.name.trim();
   let url = req.query.url;
 
   db.deleteLink(name, url).then(() => {
@@ -130,7 +130,7 @@ app.get('/token', function(req, res) {
 
 // ===== POST API ===== //
 app.post('/auth', function(req, res) {
-  let username = req.body.username;
+  let username = req.body.username.trim();
   let password = req.body.password;
   let url = req.body.url ? req.body.url : 'home';
 
@@ -149,7 +149,7 @@ app.post('/auth', function(req, res) {
 });
 
 app.post('/register', function(req, res) {
-  let username = req.body.username;
+  let username = req.body.username.trim();
   let password = req.body.password;
   let tan = req.body.tan;
 
@@ -234,13 +234,35 @@ app.post('/del-account', function(req, res) {
 app.post('/add-link', function(req, res) {
   if (!auth.checkLogin(req, res, 'links')) return;
 
-  let name = req.body.name;
+  let name = req.body.name.trim();
   let url = req.body.url;
 
-  db.createLink(name, url, req.session.userId).then(success = () => {
-    res.redirect('/links');
+  db.createLink(name, url, req.session.userId).then(() => {
+    res.redirect('/links?res=Link erstellt');
   }).catch((msg) => {
-    res.redirect(`/links?nope=${msg}`);
+    res.redirect(`/links?res=${msg}`);
+  });
+});
+
+app.post('/new-project', function(req, res) {
+  if (!auth.checkLogin(req, res, 'projects')) return;
+
+  let name = req.body.name.trim();
+
+  db.getProject({
+    'name': name
+  }).then(project => {
+    if (project) {
+      throw new Error('Project existiert bereits');
+    } else {
+      return db.createProject(name);
+    }
+  }).then(project => {
+    return db.createMaintainer(project.id, req.session.userId);
+  }).then(() => {
+    res.redirect(`/projects?res=Projekt erstellt`);
+  }).catch((msg) => {
+    res.redirect(`/projects?res=${msg}`);
   });
 });
 

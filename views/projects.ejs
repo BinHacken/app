@@ -11,6 +11,14 @@
   </header>
 
   <div class="container">
+    <section id="res">
+      <p>
+        <% if(res) { %>
+        <%= res %>
+        <% } %>
+      </p>
+    </section>
+
     <section>
       <ul>
         <li>Projekte</li>
@@ -25,7 +33,7 @@
           Maintainers:
           <span class="maintainers">
             <% project.maintainers.forEach(function(maintainer){ %>
-            <a><%- maintainer.username %></a>,
+            <a><%- maintainer.name %></a>,
             <% }); %>
           </span>
         </li>
@@ -35,7 +43,7 @@
 
     <section>
       <form method="post" action="new-project">
-        <input type="text" name="name" maxlength="32" required>
+        <input type="text" name="name" minlegth="1" maxlength="32" required>
         <button type="submit" class="primary">Neues Projekt</button>
       </form>
     </section>
