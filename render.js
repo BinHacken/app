@@ -42,8 +42,24 @@ function projects(req, res) {
     res.render('projects', {
       loggedin: req.session.loggedin,
       projects: data,
-      res: req.query.res
+      res: undefined
     });
+  });
+}
+
+function project(req, res, projectId) {
+  return db.getProject({
+    'id': projectId
+  }).then(project => {
+    if (project) {
+      return res.render('project', {
+        loggedin: req.session.loggedin,
+        project: project,
+        res: undefined
+      });
+    } else {
+      throw new Error(`Project ${projectId} not found`);
+    }
   });
 }
 
@@ -75,6 +91,7 @@ module.exports = {
   register,
   users,
   projects,
+  project,
   links,
   profile
 };

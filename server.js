@@ -56,7 +56,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/home', function(req, res) {
-  if (!auth.checkLogin(req, res, 'home')) return;
+  if (!auth.checkLogin(req, res)) return;
   render.home(req, res);
 });
 
@@ -75,22 +75,38 @@ app.get('/register', function(req, res) {
 });
 
 app.get('/users', function(req, res) {
-  if (!auth.checkLogin(req, res, 'users')) return;
+  if (!auth.checkLogin(req, res)) return;
   render.users(req, res);
 });
 
 app.get('/projects', function(req, res) {
-  if (!auth.checkLogin(req, res, 'projects')) return;
+  if (!auth.checkLogin(req, res)) return;
   render.projects(req, res);
 });
 
+app.get('/project', function(req, res) {
+  if (!auth.checkLogin(req, res)) return;
+
+  let projectId = req.query.project;
+
+  db.isMaintainer(projectId, req.session.userId).then(pm => {
+    if (pm) {
+      return render.project(req, res, projectId);
+    } else {
+      throw new Error(`User not maintaining project`);
+    }
+  }).catch(msg => {
+    res.redirect(`/projects?res=${msg}`);
+  });
+});
+
 app.get('/links', function(req, res) {
-  if (!auth.checkLogin(req, res, 'links')) return;
+  if (!auth.checkLogin(req, res)) return;
   render.links(req, res);
 });
 
 app.get('/profile', function(req, res) {
-  if (!auth.checkLogin(req, res, 'profile')) return;
+  if (!auth.checkLogin(req, res)) return;
   render.profile(req, res);
 });
 
@@ -106,7 +122,7 @@ app.get('/logout', function(req, res) {
 
 // ===== GET API ===== //
 app.get('/del-link', function(req, res) {
-  if (!auth.checkLogin(req, res, 'links')) return;
+  if (!auth.checkLogin(req, res)) return;
 
   let name = req.query.name.trim();
   let url = req.query.url;
@@ -165,7 +181,7 @@ app.post('/register', function(req, res) {
 });
 
 app.post('/update-name', function(req, res) {
-  if (!auth.checkLogin(req, res, 'update-name')) return;
+  if (!auth.checkLogin(req, res)) return;
 
   let new_username = req.body.username;
 
@@ -177,7 +193,7 @@ app.post('/update-name', function(req, res) {
 });
 
 app.post('/update-data', function(req, res) {
-  if (!auth.checkLogin(req, res, 'update-data')) return;
+  if (!auth.checkLogin(req, res)) return;
 
   let new_data = req.body.data;
 
@@ -189,7 +205,7 @@ app.post('/update-data', function(req, res) {
 });
 
 app.post('/update-pswd', function(req, res) {
-  if (!auth.checkLogin(req, res, 'update-pswd')) return;
+  if (!auth.checkLogin(req, res)) return;
 
   let old_password = req.body.password_old;
   let new_password = req.body.password_new;
@@ -211,7 +227,7 @@ app.post('/update-pswd', function(req, res) {
 });
 
 app.post('/del-account', function(req, res) {
-  if (!auth.checkLogin(req, res, 'del-account')) return;
+  if (!auth.checkLogin(req, res)) return;
 
   let password = req.body.password;
 
@@ -232,7 +248,7 @@ app.post('/del-account', function(req, res) {
 });
 
 app.post('/add-link', function(req, res) {
-  if (!auth.checkLogin(req, res, 'links')) return;
+  if (!auth.checkLogin(req, res)) return;
 
   let name = req.body.name.trim();
   let url = req.body.url;
@@ -245,7 +261,7 @@ app.post('/add-link', function(req, res) {
 });
 
 app.post('/new-project', function(req, res) {
-  if (!auth.checkLogin(req, res, 'projects')) return;
+  if (!auth.checkLogin(req, res)) return;
 
   let name = req.body.name.trim();
 
@@ -259,9 +275,9 @@ app.post('/new-project', function(req, res) {
     }
   }).then(project => {
     return db.createMaintainer(project.id, req.session.userId);
-  }).then(() => {
-    res.redirect(`/projects?res=Projekt erstellt`);
-  }).catch((msg) => {
+  }).then(pm => {
+    res.redirect(`/project?project=${pm.projectId}`);
+  }).catch(msg => {
     res.redirect(`/projects?res=${msg}`);
   });
 });

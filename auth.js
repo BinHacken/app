@@ -2,11 +2,11 @@ const db = require('./db.js');
 const cookie = require('./cookie.js');
 const tanlist = require('./tan.js');
 
-function checkLogin(req, res, url) {
+function checkLogin(req, res) {
   if (req.session.loggedin) {
     return true;
   } else {
-    res.redirect(`/login?url=${url}`);
+    res.redirect(`/login?url=${req.originalUrl.substring(1)}`);
     return false;
   }
 }

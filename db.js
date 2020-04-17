@@ -207,28 +207,27 @@ function createUser(username, password) {
 };
 
 function getUser(data) {
-  if (data['id'] && data['password']) {
+  if (data.hasOwnProperty('id') && data.hasOwnProperty('password')) {
     return User.findOne({
       where: {
         id: data['id'],
         password: hash.make(data['password'])
       }
     });
-  } else if (data['name'] && data['password']) {
+  } else if (data.hasOwnProperty('name') && data.hasOwnProperty('password')) {
     return User.findOne({
       where: {
         name: data['name'],
         password: hash.make(data['password'])
       }
     });
-  } else if (data['id']) {
+  } else if (data.hasOwnProperty('id')) {
     return User.findOne({
       where: {
         id: data['id']
       }
     });
-
-  } else if (data['name']) {
+  } else if (data.hasOwnProperty('name')) {
     return User.findOne({
       where: {
         name: data['name']
@@ -347,7 +346,7 @@ function createProject(name) {
 }
 
 function getProject(data) {
-  if (data['name']) {
+  if (data.hasOwnProperty('name')) {
     return Project.findOne({
       where: {
         name: data['name']
@@ -360,7 +359,7 @@ function getProject(data) {
         as: 'todos'
       }]
     });
-  } else if (data['id']) {
+  } else if (data.hasOwnProperty('id')) {
     return Project.findOne({
       where: {
         id: data['id']
@@ -399,13 +398,6 @@ function editProject(id, name, description) {
   });
 }
 
-function createMaintainer(projectId, userId) {
-  return ProjectMaintainers.create({
-    projectId: projectId,
-    userId: userId
-  });
-}
-
 function deleteProject(projectId) {
   return Project.destroy({
     where: {
@@ -414,6 +406,24 @@ function deleteProject(projectId) {
   });
 }
 
+// ===== Maintainer ===== //
+function createMaintainer(projectId, userId) {
+  return ProjectMaintainers.create({
+    projectId: projectId,
+    userId: userId
+  });
+}
+
+function isMaintainer(projectId, userId) {
+  return ProjectMaintainers.findOne({
+    where: {
+      projectId: projectId,
+      userId: userId
+    }
+  });
+}
+
+// ===== Todo ==== //
 function createTodo(projectId, description, userId) {
   return Todo.create({
     description: description,
@@ -430,6 +440,7 @@ function deleteProjectTodo(todoId) {
   });
 }
 
+// ===== Token ===== //
 function createToken(userId, token) {
   return Token.count({
     where: {
@@ -468,8 +479,9 @@ module.exports = {
   getProject,
   getProjectList,
   editProject,
-  createMaintainer,
   deleteProject,
+  createMaintainer,
+  isMaintainer,
   createTodo,
   deleteProjectTodo,
   createToken

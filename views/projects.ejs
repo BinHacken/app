@@ -33,8 +33,12 @@
           Maintainers:
           <span class="maintainers">
             <% project.maintainers.forEach(function(maintainer){ %>
-            <a><%- maintainer.name %></a>,
+            <a><%- maintainer.name %></a>
             <% }); %>
+          </span>
+          <br>
+          <span>
+            <a class="button primary" href="project?project=<%= project.id %>">Bearbeiten</a>
           </span>
         </li>
         <% }); %>
