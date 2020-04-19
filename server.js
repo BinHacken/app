@@ -144,7 +144,7 @@ app.get('/token', function(req, res) {
     res.status(404).send('File not found').end();
   } else {
     db.createToken(req.session.userId, req.query.data).then(() => {
-      res.status(200).send('OK').end();
+      res.redirect('/home');
     });
   }
 });
