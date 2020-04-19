@@ -1,5 +1,5 @@
 {
-  "name": "binhacken_orka",
+  "name": "binhackenapp",
   "version": "1.0.0",
   "description": "organisation app for binhacken",
   "main": "sever.js",
@@ -10,6 +10,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
+    "firebase-admin": "^8.10.0",
     "markdown-it": "^10.0.0",
     "sequelize": "^5.21.5",
     "sqlite3": "^4.1.1"
@@ -20,5 +21,13 @@
     "start": "pm2 start pm2.json"
   },
   "author": "binhacken",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BinHacken/app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BinHacken/app/issues"
+  },
+  "homepage": "https://github.com/BinHacken/app#readme"
 }

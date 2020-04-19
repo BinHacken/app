@@ -134,6 +134,20 @@ const Token = sequelize.define('token', {
 }, {
   timestamps: false
 });
+
+const Message = sequelize.define('message', {
+  data: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  timestamps: false
+});
+
 // ========== Relationships ========== //
 
 User.hasMany(Session, {
@@ -174,6 +188,12 @@ User.hasMany(Todo, {
   as: 'todos',
   onDelete: 'SET NULL'
 });
+
+User.hasMany(Message, {
+  as: 'messages',
+  onDelete: 'CASCADE'
+});
+Message.belongsTo(User);
 
 // ========== Functions ========== //
 function init(alter) {
@@ -441,14 +461,6 @@ function deleteProjectTodo(todoId) {
 }
 
 // ===== Token ===== //
-function getTokens() {
-  return Token.findAll({
-    include: [{
-      model: User
-    }]
-  });
-}
-
 function createToken(userId, token) {
   return Token.count({
     where: {
@@ -479,6 +491,38 @@ function createToken(userId, token) {
   });
 }
 
+function deleteToken(tokenId) {
+  return Token.destroy({
+    where: {
+      id: tokenId
+    }
+  });
+}
+
+function getTokens() {
+  return Token.findAll({
+    include: [{
+      model: User
+    }]
+  });
+}
+
+// ===== Message ===== //
+function createMessage(msg, userId) {
+  return Message.create({
+    data: msg,
+    userId: userId
+  });
+}
+
+function getMessages() {
+  return Message.findAll({
+    include: [{
+      model: User
+    }]
+  });
+}
+
 module.exports = {
   init,
   createUser,
@@ -501,6 +545,9 @@ module.exports = {
   isMaintainer,
   createTodo,
   deleteProjectTodo,
+  createToken,
+  deleteToken,
   getTokens,
-  createToken
+  createMessage,
+  getMessages
 };

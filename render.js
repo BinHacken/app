@@ -2,10 +2,13 @@ const db = require('./db.js');
 const auth = require('./auth.js');
 
 function home(req, res) {
-  db.getLinks().then((links) => {
-    res.render('home', {
-      loggedin: req.session.loggedin,
-      links: links
+  db.getLinks().then(links => {
+    db.getMessages().then(messages => {
+      res.render('home', {
+        loggedin: req.session.loggedin,
+        links: links,
+        messages: messages
+      });
     });
   });
 }

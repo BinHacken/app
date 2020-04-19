@@ -10,6 +10,7 @@ const db = require('./db.js');
 const cookie = require('./cookie.js');
 const auth = require('./auth.js');
 const render = require('./render.js');
+const push = require('./push.js');
 
 const args = process.argv.slice(2);
 
@@ -283,6 +284,24 @@ app.post('/new-project', function(req, res) {
   }).catch(msg => {
     res.redirect(`/projects?res=${msg}`);
   });
+});
+
+app.post('/new-msg', function(req, res) {
+  if (!auth.checkLogin(req, res)) return;
+
+  let msg = req.body.msg.trim();
+
+  db.createMessage(msg, req.session.userId).then(() => {
+    res.redirect('/home');
+  }).then(() => {
+    return db.getTokens();
+  }).then(tokens => {
+    tokens.forEach(token => {
+      push.send(msg, token.data).catch(() => {
+        db.deleteToken(token.id);
+      });
+    });
+  })
 });
 
 // ===== 404 ===== //

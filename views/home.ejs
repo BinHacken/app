@@ -25,6 +25,22 @@
         </li>
       </ul>
     </section>
+
+    <section>
+      <ul>
+        <li>Nachrichten</li>
+        <li>
+          <% messages.forEach(function(msg){ %>
+          <p><%= msg.data %></p>
+          <a><%= msg.user.name %></a>
+          <% }); %>
+        </li>
+      </ul>
+      <form action="new-msg" method="post">
+        <input type="text" name="msg" placeholder="Nachricht">
+        <button type="submit" class="primary">senden</button>
+      </form>
+    </section>
   </div>
 </body>
 
