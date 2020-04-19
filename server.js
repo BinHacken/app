@@ -105,6 +105,11 @@ app.get('/links', function(req, res) {
   render.links(req, res);
 });
 
+app.get('/tokens', function(req, res) {
+  if (!auth.checkLogin(req, res)) return;
+  render.tokens(req, res);
+});
+
 app.get('/profile', function(req, res) {
   if (!auth.checkLogin(req, res)) return;
   render.profile(req, res);

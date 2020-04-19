@@ -441,6 +441,14 @@ function deleteProjectTodo(todoId) {
 }
 
 // ===== Token ===== //
+function getTokens() {
+  return Token.findAll({
+    include: [{
+      model: User
+    }]
+  });
+}
+
 function createToken(userId, token) {
   return Token.count({
     where: {
@@ -484,5 +492,6 @@ module.exports = {
   isMaintainer,
   createTodo,
   deleteProjectTodo,
+  getTokens,
   createToken
 };

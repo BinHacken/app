@@ -73,6 +73,16 @@ function links(req, res) {
   });
 }
 
+function tokens(req, res) {
+  db.getTokens().then((data) => {
+    return res.render('tokens', {
+      loggedin: req.session.loggedin,
+      tokens: data,
+      res: req.query.res
+    });
+  });
+}
+
 function profile(req, res) {
   db.getUser({
     'id': req.session.userId
@@ -93,5 +103,6 @@ module.exports = {
   projects,
   project,
   links,
+  tokens,
   profile
 };

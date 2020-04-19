@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <%- include('head'); %>
+</head>
+
+<body>
+  <header>
+    <%- include('header'); %>
+  </header>
+
+  <div class="container">
+    <section id="res">
+      <p>
+        <% if(res) { %>
+        <%= res %>
+        <% } %>
+      </p>
+    </section>
+
+    <section>
+      <ul>
+        <li>Tokens</li>
+        <% tokens.forEach(function(token){ %>
+        <li>
+          <a><%= token.data %></a>: <a><%= token.user.name %></a>
+          <a class="button danger" href="del-token?id=<%= token.id %>">X</a>
+        </li>
+        <% }); %>
+      </ul>
+    </section>
+
+    <!--<section>
+      <form method="post" action="add-token">
+        <input type="text" placeholder="Token" name="token">
+        <input type="text" placeholder="Username" name="username">
+        <button type="submit" class="primary">Hinzufügen</button>
+      </form>
+    </section>-->
+  </div>
+</body>
+
+</html>
