@@ -211,6 +211,10 @@ input[type=submit], button, .button {
   line-height: 1.5;
   border-radius: .25rem;
   text-decoration: none;
+  margin-left: 0;
+  margin-right: .25rem;
+  margin-top: 0;
+  margin-bottom: .25rem;
 }
 
 input[type=submit]:hover, button:hover, .button:hover {
