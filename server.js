@@ -140,13 +140,11 @@ app.get('/del-link', function(req, res) {
 });
 
 app.get('/token', function(req, res) {
-  if (!req.session.loggedin || !req.query.data) {
-    res.status(404).send('File not found').end();
-  } else {
-    db.createToken(req.session.userId, req.query.data).then(() => {
-      res.redirect('/home');
-    });
-  }
+  if (!auth.checkLogin(req, res)) return;
+
+  db.createToken(req.session.userId, req.query.data).then(() => {
+    res.redirect('/home');
+  });
 });
 
 // ===== POST API ===== //

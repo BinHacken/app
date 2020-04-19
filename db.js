@@ -463,11 +463,20 @@ function createToken(userId, token) {
       });
     }
   }).then(() => {
-    return Token.create({
-      data: token,
-      userId: userId
-    });
-  })
+    return Token.count({
+      where: {
+        userId: userId,
+        data: token
+      }
+    })
+  }).then(found => {
+    if (found == 0) {
+      return Token.create({
+        data: token,
+        userId: userId
+      });
+    }
+  });
 }
 
 module.exports = {
