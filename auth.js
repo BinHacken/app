@@ -1,6 +1,6 @@
 const db = require('./db.js');
 const cookie = require('./cookie.js');
-const tanlist = require('./tan.js');
+const tanlist = require('./private/tan.js');
 
 function checkLogin(req, res) {
   if (req.session.loggedin) {
