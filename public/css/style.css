@@ -70,6 +70,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 99;
+  margin-bottom: 2rem;
 }
 
 header a {
@@ -190,15 +191,6 @@ nav a.active {
   color: #fff;
 }
 
-/* Section */
-section {
-  padding: 2rem 0;
-}
-
-section+section {
-  padding-top: 0;
-}
-
 /* Button */
 input[type=submit], button, .button {
   display: inline-block;
@@ -259,6 +251,10 @@ form * {
 form input, form textarea {
   width: 100%;
   box-sizing: border-box;
+}
+
+form {
+  padding-bottom: 2rem;
 }
 
 /* List */

@@ -24,24 +24,18 @@
         <input type="text" name="username" value="<%= user.name %>" minlegth="1" maxlength="32" required>
         <button type="submit" class="primary">Benutzername ändern</button>
       </form>
-    </section>
 
-    <section>
       <form methid="get" action="update-data">
         <textarea name="data" rows="8" cols="80" minlegth="1" maxlength="2048"><%= user.data %></textarea>
         <button type="submit" class="primary">Beschreibung ändern</button>
       </form>
-    </section>
 
-    <section>
       <form methid="get" action="update-pswd">
         <input type="password" placeholder="Altes Passwort" name="password_old" required>
         <input type="password" placeholder="Neues Passwort" name="password_new" required>
         <button type="submit" class="primary">Passwort ändern</button>
       </form>
-    </section>
 
-    <section>
       <form methid="get" action="del-account">
         <input type="password" placeholder="Passwort" name="password" required>
         <button type="submit" class="danger">Account dauerhaft löschen</button>
