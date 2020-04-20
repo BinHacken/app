@@ -23,23 +23,25 @@
       <ul>
         <li>Projekte</li>
         <% projects.forEach(function(project){ %>
+        <% canEdit = false; %>
         <li>
-          <span class="title">
-            <%= project.name %>
-          </span>
-          <span class="userdata">
-            <%- project.html %>
-          </span>
-          Maintainers:
-          <span class="maintainers">
+          <p class="title"><%= project.name %></p>
+
+          <%- project.html %>
+
+          <p class="maintainers">
+            Maintainer:
             <% project.maintainers.forEach(function(maintainer){ %>
-            <a><%- maintainer.name %></a>
+            <a href="users?id=<%= maintainer.id %>"><%= maintainer.name %></a>
+            <% if(maintainer.id == userId) canEdit = true; %>
             <% }); %>
-          </span>
-          <br>
-          <span>
-            <a class="button primary" href="project?project=<%= project.id %>">Bearbeiten</a>
-          </span>
+          </p>
+
+          <% if(canEdit) { %>
+          <p>
+            <a class=" button primary" href="project?project=<%= project.id %>">Bearbeiten</a>
+          </p>
+          <% }; %>
         </li>
         <% }); %>
       </ul>

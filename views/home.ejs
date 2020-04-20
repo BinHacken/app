@@ -29,13 +29,18 @@
     <section>
       <ul>
         <li>Nachrichten</li>
+        <% messages.forEach(function(msg){ %>
         <li>
-          <% messages.forEach(function(msg){ %>
-          <%= msg.shortdate %><br>
-          <p><%= msg.data %></p>
-          <a><%= msg.user.name %></a>
-          <% }); %>
+          <p>
+            <span class="title">
+              <span class="date"><%= msg.shortdate %></span>
+              <span class="link"><a><%= msg.user.name %></a></span>
+            </span>
+            <br>
+            <span class="data"><%= msg.data %></span>
+          </p>
         </li>
+        <% }); %>
       </ul>
       <form action="new-msg" methid="get">
         <input type="text" name="msg" placeholder="Nachricht">

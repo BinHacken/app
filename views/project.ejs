@@ -24,24 +24,18 @@
         <input type="text" name="name" value="<%= project.name %>" minlegth="1" maxlength="32" required>
         <button type="submit" class="primary">Projektname ändern</button>
       </form>
-    </section>
 
-    <section>
       <form methid="get" action="update-project-data">
         <textarea name="data" rows="8" cols="80" minlegth="1" maxlength="2048"><%= project.data %></textarea>
         <button type="submit" class="primary">Beschreibung ändern</button>
       </form>
-    </section>
 
-    <section>
       <!-- Maintainer list -->
       <form methid="get" action="update-pswd">
         <input type="text" placeholder="Benutzername" name="maintainer" required>
         <button type="submit" class="primary">Benutzer hinzufügen</button>
       </form>
-    </section>
 
-    <section>
       <form methid="get" action="del-project">
         <button type="submit" class="danger">Projekt dauerhaft löschen</button>
       </form>

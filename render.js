@@ -45,7 +45,8 @@ function projects(req, res) {
     res.render('projects', {
       loggedin: req.session.loggedin,
       projects: data,
-      res: undefined
+      res: req.query.res,
+      userId: req.session.userId
     });
   });
 }

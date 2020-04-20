@@ -94,7 +94,7 @@ app.get('/project', function(req, res) {
     if (pm) {
       return render.project(req, res, projectId);
     } else {
-      throw new Error(`User not maintaining project`);
+      throw new Error(`Keine Rechte dieses Project zu Bearbeiten`);
     }
   }).catch(msg => {
     res.redirect(`/projects?res=${msg}`);
