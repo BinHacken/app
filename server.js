@@ -148,8 +148,15 @@ app.get('/token', function(req, res) {
   });
 });
 
-// ===== POST API ===== //
-app.post('/auth', function(req, res) {
+app.get('/del-token', function(req, res) {
+  if (!auth.checkLogin(req, res)) return;
+
+  let tokenId = req.query.id;
+
+  db.deleteToken(tokenId).then(() => {
+    res.redirect(`/tokens`);
+  });
+});
 
 app.get('/auth', function(req, res) {
   let username = req.query.username.trim();
