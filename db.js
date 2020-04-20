@@ -143,6 +143,15 @@ const Message = sequelize.define('message', {
   date: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
+  },
+  shortdate: {
+    type: DataTypes.VIRTUAL(DataTypes.STRING, ['shortdate']),
+    get() {
+      return `${this.date}`.substring(0, 21);
+    },
+    set(value) {
+      throw new Error('Do not try to set the `shortdate` value!');
+    }
   }
 }, {
   timestamps: false
@@ -519,7 +528,11 @@ function getMessages() {
   return Message.findAll({
     include: [{
       model: User
-    }]
+    }],
+    limit: 30,
+    order: [
+      ['date', 'DESC']
+    ]
   });
 }
 

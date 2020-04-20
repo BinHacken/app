@@ -31,6 +31,7 @@
         <li>Nachrichten</li>
         <li>
           <% messages.forEach(function(msg){ %>
+          <%= msg.shortdate %><br>
           <p><%= msg.data %></p>
           <a><%= msg.user.name %></a>
           <% }); %>
