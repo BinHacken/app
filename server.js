@@ -150,9 +150,11 @@ app.get('/token', function(req, res) {
 
 // ===== POST API ===== //
 app.post('/auth', function(req, res) {
-  let username = req.body.username.trim();
-  let password = req.body.password;
-  let url = req.body.url ? req.body.url : 'home';
+
+app.get('/auth', function(req, res) {
+  let username = req.query.username.trim();
+  let password = req.query.password;
+  let url = req.query.url ? req.query.url : 'home';
 
   console.log('Login');
   console.log({
@@ -168,10 +170,10 @@ app.post('/auth', function(req, res) {
   });
 });
 
-app.post('/register', function(req, res) {
-  let username = req.body.username.trim();
-  let password = req.body.password;
-  let tan = req.body.tan;
+app.get('/register', function(req, res) {
+  let username = req.query.username.trim();
+  let password = req.query.password;
+  let tan = req.query.tan;
 
   console.log(`Register "${username}"`);
 
@@ -184,10 +186,10 @@ app.post('/register', function(req, res) {
   });
 });
 
-app.post('/update-name', function(req, res) {
+app.get('/update-name', function(req, res) {
   if (!auth.checkLogin(req, res)) return;
 
-  let new_username = req.body.username;
+  let new_username = req.query.username;
 
   auth.rename(req, res, req.session.userId, new_username).then(() => {
     res.redirect(`/profile?res=Benutzername geändert zu ${new_username}`);
@@ -196,10 +198,10 @@ app.post('/update-name', function(req, res) {
   });
 });
 
-app.post('/update-data', function(req, res) {
+app.get('/update-data', function(req, res) {
   if (!auth.checkLogin(req, res)) return;
 
-  let new_data = req.body.data;
+  let new_data = req.query.data;
 
   db.updateUser(req.session.userId, 'data', new_data).then(() => {
     res.redirect(`/profile?res=Beschreibung geändert`);
@@ -208,11 +210,11 @@ app.post('/update-data', function(req, res) {
   });
 });
 
-app.post('/update-pswd', function(req, res) {
+app.get('/update-pswd', function(req, res) {
   if (!auth.checkLogin(req, res)) return;
 
-  let old_password = req.body.password_old;
-  let new_password = req.body.password_new;
+  let old_password = req.query.password_old;
+  let new_password = req.query.password_new;
 
   db.getUser({
     'id': req.session.userId,
@@ -230,10 +232,10 @@ app.post('/update-pswd', function(req, res) {
   });
 });
 
-app.post('/del-account', function(req, res) {
+app.get('/del-account', function(req, res) {
   if (!auth.checkLogin(req, res)) return;
 
-  let password = req.body.password;
+  let password = req.query.password;
 
   db.getUser({
     'id': req.session.userId,
@@ -251,11 +253,11 @@ app.post('/del-account', function(req, res) {
   });
 });
 
-app.post('/add-link', function(req, res) {
+app.get('/add-link', function(req, res) {
   if (!auth.checkLogin(req, res)) return;
 
-  let name = req.body.name.trim();
-  let url = req.body.url;
+  let name = req.query.name.trim();
+  let url = req.query.url;
 
   db.createLink(name, url, req.session.userId).then(() => {
     res.redirect('/links?res=Link erstellt');
@@ -264,10 +266,10 @@ app.post('/add-link', function(req, res) {
   });
 });
 
-app.post('/new-project', function(req, res) {
+app.get('/new-project', function(req, res) {
   if (!auth.checkLogin(req, res)) return;
 
-  let name = req.body.name.trim();
+  let name = req.query.name.trim();
 
   db.getProject({
     'name': name
@@ -286,10 +288,10 @@ app.post('/new-project', function(req, res) {
   });
 });
 
-app.post('/new-msg', function(req, res) {
+app.get('/new-msg', function(req, res) {
   if (!auth.checkLogin(req, res)) return;
 
-  let msg = req.body.msg.trim();
+  let msg = req.query.msg.trim();
 
   db.createMessage(msg, req.session.userId).then(() => {
     res.redirect('/home');
