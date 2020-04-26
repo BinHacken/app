@@ -527,6 +527,14 @@ function createMessage(msg, userId) {
   });
 }
 
+function deleteMessage(msgId) {
+  return Message.destroy({
+    where: {
+      id: msgId
+    }
+  });
+}
+
 function getMessages() {
   return Message.findAll({
     include: [{
@@ -565,5 +573,6 @@ module.exports = {
   deleteToken,
   getTokens,
   createMessage,
+  deleteMessage,
   getMessages
 };

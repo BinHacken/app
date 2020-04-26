@@ -87,6 +87,16 @@ function tokens(req, res) {
   });
 }
 
+function messages(req, res) {
+  db.getMessages().then((data) => {
+    return res.render('messages', {
+      loggedin: req.session.loggedin,
+      messages: data,
+      res: req.query.res
+    });
+  });
+}
+
 function profile(req, res) {
   db.getUser({
     'id': req.session.userId
@@ -108,5 +118,6 @@ module.exports = {
   project,
   links,
   tokens,
+  messages,
   profile
 };

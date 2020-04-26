@@ -111,6 +111,11 @@ app.get('/tokens', (req, res) => {
   render.tokens(req, res);
 });
 
+app.get('/messages', (req, res) => {
+  if (!auth.checkLogin(req, res)) return;
+  render.messages(req, res);
+});
+
 app.get('/profile', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
   render.profile(req, res);
@@ -311,6 +316,16 @@ app.get('/new-msg', (req, res) => {
       });
     });
   })
+});
+
+app.get('/del-msg', (req, res) => {
+  if (!auth.checkLogin(req, res)) return;
+
+  let msgId = req.query.id;
+
+  db.deleteMessage(msgId).then(() => {
+    res.redirect('/messages');
+  });
 });
 
 app.get('/update-project-name', (req, res) => {

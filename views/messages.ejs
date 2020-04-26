@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <%- include('head'); %>
+</head>
+
+<body>
+  <header>
+    <%- include('header'); %>
+  </header>
+
+  <div class="container">
+    <section id="res">
+      <p>
+        <% if(res) { %>
+        <%= res %>
+        <% } %>
+      </p>
+    </section>
+
+    <section>
+      <ul>
+        <li>Nachrichten</li>
+        <% messages.forEach(function(msg){ %>
+        <li>
+          <p>
+            <span class="title">
+              <span class="date"><%= msg.shortdate %></span>
+              <span class="link"><a><%= msg.user.name %></a></span>
+            </span>
+            <br>
+            <span class="data"><%= msg.data %></span>
+          </p>
+          <a class="button danger" href="del-msg?id=<%= msg.id %>">X</a>
+        </li>
+        <% }); %>
+      </ul>
+      <form action="new-msg" methid="get">
+        <input type="text" name="msg" placeholder="Nachricht">
+        <button type="submit" class="primary">senden</button>
+      </form>
+    </section>
+
+    <!--<section>
+      <form methid="get" action="add-token">
+        <input type="text" placeholder="Token" name="token">
+        <input type="text" placeholder="Username" name="username">
+        <button type="submit" class="primary">Hinzufügen</button>
+      </form>
+    </section>-->
+  </div>
+</body>
+
+</html>
