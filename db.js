@@ -89,7 +89,7 @@ const Project = sequelize.define('project', {
   description: {
     type: DataTypes.TEXT,
     set(value) {
-      this.setDataValue('data', value.substring(0, 2048));
+      this.setDataValue('description', value.substring(0, 2048));
     }
   },
   html: {
@@ -416,14 +416,12 @@ function getProjectList() {
   });
 }
 
-function editProject(id, name, description) {
-  return Project.update({
-    name: name,
-    description: description
-  }, {
-    where: {
-      id: id
-    }
+function updateProject(projectId, field, value) {
+  return getProject({
+    'id': projectId
+  }).then(project => {
+    project.set(field, value);
+    return project.save();
   });
 }
 
@@ -437,9 +435,14 @@ function deleteProject(projectId) {
 
 // ===== Maintainer ===== //
 function createMaintainer(projectId, userId) {
-  return ProjectMaintainers.create({
-    projectId: projectId,
-    userId: userId
+  return isMaintainer(projectId, userId).then(maintainer => {
+    if (maintainer) throw new Error('Ist bereits Maintainer');
+    else {
+      return ProjectMaintainers.create({
+        projectId: projectId,
+        userId: userId
+      });
+    }
   });
 }
 
@@ -552,7 +555,7 @@ module.exports = {
   createProject,
   getProject,
   getProjectList,
-  editProject,
+  updateProject,
   deleteProject,
   createMaintainer,
   isMaintainer,

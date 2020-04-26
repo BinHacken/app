@@ -59,7 +59,7 @@ function project(req, res, projectId) {
       return res.render('project', {
         loggedin: req.session.loggedin,
         project: project,
-        res: undefined
+        res: req.query.res
       });
     } else {
       throw new Error(`Project ${projectId} not found`);

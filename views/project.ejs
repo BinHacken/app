@@ -3,6 +3,13 @@
 
 <head>
   <%- include('head'); %>
+  <script>
+    function deleteProject(id) {
+      if (prompt("Bist du dir sicher? [ja/nein]") == "ja") {
+        location.replace("del-project?projectId=" + id);
+      }
+    }
+  </script>
 </head>
 
 <body>
@@ -22,23 +29,48 @@
     <section>
       <form methid="get" action="update-project-name">
         <input type="text" name="name" value="<%= project.name %>" minlegth="1" maxlength="32" required>
+        <input type="hidden" name="projectId" value="<%= project.id %>" required>
         <button type="submit" class="primary">Projektname ändern</button>
       </form>
 
-      <form methid="get" action="update-project-data">
-        <textarea name="data" rows="8" cols="80" minlegth="1" maxlength="2048"><%= project.data %></textarea>
+      <form methid="get" action="update-project-description">
+        <textarea name="description" rows="8" cols="80" minlegth="1" maxlength="2048"><%= project.description %></textarea>
+        <input type="hidden" name="projectId" value="<%= project.id %>" required>
         <button type="submit" class="primary">Beschreibung ändern</button>
       </form>
 
       <!-- Maintainer list -->
-      <form methid="get" action="update-pswd">
+      <p class="maintainers">
+        Maintainer:
+        <% project.maintainers.forEach(function(maintainer){ %>
+        <a href="users?id=<%= maintainer.id %>"><%= maintainer.name %></a>,
+        <% }); %>
+      </p>
+
+      <form methid="get" action="add-maintainer">
         <input type="text" placeholder="Benutzername" name="maintainer" required>
+        <input type="hidden" name="projectId" value="<%= project.id %>" required>
         <button type="submit" class="primary">Benutzer hinzufügen</button>
       </form>
 
-      <form methid="get" action="del-project">
-        <button type="submit" class="danger">Projekt dauerhaft löschen</button>
+      <!-- Todo List -->
+      <ul>
+        Todo:
+        <% project.todos.forEach(function(todo){ %>
+        <li>
+          <%= todo.description %>
+          <a class="button danger" href="del-todo?id=<%= todo.id %>&projectId=<%= project.id %>">X</a>
+        </li>
+        <% }); %>
+      </ul>
+
+      <form methid="get" action="add-todo">
+        <input type="text" placeholder="Aufgabe" name="description" required>
+        <input type="hidden" name="projectId" value="<%= project.id %>" required>
+        <button type="submit" class="primary">Todo hinzufügen</button>
       </form>
+
+      <button type="submit" class="danger" onclick="deleteProject(<%= project.id %>)">Projekt dauerhaft löschen</button>
     </section>
   </div>
 </body>

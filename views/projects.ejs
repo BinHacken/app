@@ -32,7 +32,7 @@
           <p class="maintainers">
             Maintainer:
             <% project.maintainers.forEach(function(maintainer){ %>
-            <a href="users?id=<%= maintainer.id %>"><%= maintainer.name %></a>
+            <a href="users?id=<%= maintainer.id %>"><%= maintainer.name %></a>,
             <% if(maintainer.id == userId) canEdit = true; %>
             <% }); %>
           </p>

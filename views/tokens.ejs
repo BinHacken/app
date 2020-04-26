@@ -24,7 +24,7 @@
         <li>Tokens</li>
         <% tokens.forEach(function(token){ %>
         <li>
-          <a><%= token.data %></a>: <a><%= token.user.name %></a>
+          <%= token.data %></a> : <a href="users?id=<%= token.user.id %>"><%= token.user.name %></a>
           <a class="button danger" href="del-token?id=<%= token.id %>">X</a>
         </li>
         <% }); %>

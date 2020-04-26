@@ -52,16 +52,16 @@ if (args.includes('https')) {
 }
 
 // ===== User ===== //
-app.get('/', function(req, res) {
+app.get('/', (req, res) => {
   res.redirect('/home');
 });
 
-app.get('/home', function(req, res) {
+app.get('/home', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
   render.home(req, res);
 });
 
-app.get('/login', function(req, res) {
+app.get('/login', (req, res) => {
   let url = req.query.url ? req.query.url : 'home';
 
   auth.startSession(req, res).then(() => {
@@ -71,21 +71,21 @@ app.get('/login', function(req, res) {
   });
 });
 
-app.get('/register', function(req, res) {
+app.get('/register', (req, res) => {
   render.register(req, res);
 });
 
-app.get('/users', function(req, res) {
+app.get('/users', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
   render.users(req, res);
 });
 
-app.get('/projects', function(req, res) {
+app.get('/projects', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
   render.projects(req, res);
 });
 
-app.get('/project', function(req, res) {
+app.get('/project', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let projectId = req.query.project;
@@ -101,22 +101,22 @@ app.get('/project', function(req, res) {
   });
 });
 
-app.get('/links', function(req, res) {
+app.get('/links', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
   render.links(req, res);
 });
 
-app.get('/tokens', function(req, res) {
+app.get('/tokens', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
   render.tokens(req, res);
 });
 
-app.get('/profile', function(req, res) {
+app.get('/profile', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
   render.profile(req, res);
 });
 
-app.get('/logout', function(req, res) {
+app.get('/logout', (req, res) => {
   let _cookie = cookie.get(req);
 
   req.session.destroy();
@@ -127,7 +127,7 @@ app.get('/logout', function(req, res) {
 });
 
 // ===== GET API ===== //
-app.get('/del-link', function(req, res) {
+app.get('/del-link', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let name = req.query.name.trim();
@@ -140,7 +140,7 @@ app.get('/del-link', function(req, res) {
   });
 });
 
-app.get('/token', function(req, res) {
+app.get('/token', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   db.createToken(req.session.userId, req.query.data).then(() => {
@@ -148,7 +148,7 @@ app.get('/token', function(req, res) {
   });
 });
 
-app.get('/del-token', function(req, res) {
+app.get('/del-token', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let tokenId = req.query.id;
@@ -158,7 +158,7 @@ app.get('/del-token', function(req, res) {
   });
 });
 
-app.get('/auth', function(req, res) {
+app.get('/auth', (req, res) => {
   let username = req.query.username.trim();
   let password = req.query.password;
   let url = req.query.url ? req.query.url : 'home';
@@ -177,7 +177,7 @@ app.get('/auth', function(req, res) {
   });
 });
 
-app.get('/register', function(req, res) {
+app.get('/register', (req, res) => {
   let username = req.query.username.trim();
   let password = req.query.password;
   let tan = req.query.tan;
@@ -193,7 +193,7 @@ app.get('/register', function(req, res) {
   });
 });
 
-app.get('/update-name', function(req, res) {
+app.get('/update-name', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let new_username = req.query.username;
@@ -205,7 +205,7 @@ app.get('/update-name', function(req, res) {
   });
 });
 
-app.get('/update-data', function(req, res) {
+app.get('/update-data', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let new_data = req.query.data;
@@ -217,7 +217,7 @@ app.get('/update-data', function(req, res) {
   });
 });
 
-app.get('/update-pswd', function(req, res) {
+app.get('/update-pswd', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let old_password = req.query.password_old;
@@ -239,7 +239,7 @@ app.get('/update-pswd', function(req, res) {
   });
 });
 
-app.get('/del-account', function(req, res) {
+app.get('/del-account', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let password = req.query.password;
@@ -260,7 +260,7 @@ app.get('/del-account', function(req, res) {
   });
 });
 
-app.get('/add-link', function(req, res) {
+app.get('/add-link', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let name = req.query.name.trim();
@@ -273,7 +273,7 @@ app.get('/add-link', function(req, res) {
   });
 });
 
-app.get('/new-project', function(req, res) {
+app.get('/new-project', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let name = req.query.name.trim();
@@ -295,7 +295,7 @@ app.get('/new-project', function(req, res) {
   });
 });
 
-app.get('/new-msg', function(req, res) {
+app.get('/new-msg', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
 
   let msg = req.query.msg.trim();
@@ -313,7 +313,107 @@ app.get('/new-msg', function(req, res) {
   })
 });
 
+app.get('/update-project-name', (req, res) => {
+  if (!auth.checkLogin(req, res)) return;
+
+  let projectId = req.query.projectId;
+  let name = req.query.name;
+
+  db.isMaintainer(projectId, req.session.userId).then(hasAccess => {
+    if (!hasAccess) throw new Error("Keine Zugriffsrechte auf dieses Projekt");
+    else return db.updateProject(projectId, 'name', name);
+  }).then(() => {
+    res.redirect(`/project?project=${projectId}&res=Name geändert`);
+  }).catch(msg => {
+    res.redirect(`/project?project=${projectId}&res=${msg}`);
+  });
+});
+
+app.get('/update-project-description', (req, res) => {
+  if (!auth.checkLogin(req, res)) return;
+
+  let projectId = req.query.projectId;
+  let description = req.query.description;
+
+  db.isMaintainer(projectId, req.session.userId).then(hasAccess => {
+    if (!hasAccess) throw new Error("Keine Zugriffsrechte auf dieses Projekt");
+    else return db.updateProject(projectId, 'description', description);
+  }).then(() => {
+    res.redirect(`/project?project=${projectId}&res=Beschreibung geändert`);
+  }).catch(msg => {
+    res.redirect(`/project?project=${projectId}&res=${msg}`);
+  });
+});
+
+app.get('/add-maintainer', (req, res) => {
+  if (!auth.checkLogin(req, res)) return;
+
+  let projectId = req.query.projectId;
+  let maintainer = req.query.maintainer;
+
+  db.isMaintainer(projectId, req.session.userId).then(hasAccess => {
+    if (!hasAccess) throw new Error("Keine Zugriffsrechte auf dieses Projekt");
+    else return db.getUser({
+      'name': maintainer
+    });
+  }).then(user => {
+    if (!user) throw new Error('Benutzer konnte nicht gefunden werden');
+    else return db.createMaintainer(projectId, user.id);
+  }).then(() => {
+    res.redirect(`/project?project=${projectId}&res=Maintainer hinzugefügt`);
+  }).catch((msg) => {
+    res.redirect(`/project?project=${projectId}&res=${msg}`);
+  });
+});
+
+app.get('/add-todo', (req, res) => {
+  if (!auth.checkLogin(req, res)) return;
+
+  let projectId = req.query.projectId;
+  let description = req.query.description;
+
+  db.isMaintainer(projectId, req.session.userId).then(hasAccess => {
+    if (!hasAccess) throw new Error("Keine Zugriffsrechte auf dieses Projekt");
+    else return db.createTodo(projectId, description);
+  }).then(() => {
+    res.redirect(`/project?project=${projectId}&res=Todo hinzugefügt`);
+  }).catch((msg) => {
+    res.redirect(`/project?project=${projectId}&res=${msg}`);
+  });
+});
+
+app.get('/del-todo', (req, res) => {
+  if (!auth.checkLogin(req, res)) return;
+
+  let projectId = req.query.projectId;
+  let todoId = req.query.id;
+
+  db.isMaintainer(projectId, req.session.userId).then(hasAccess => {
+    if (!hasAccess) throw new Error("Keine Zugriffsrechte auf dieses Projekt");
+    else return db.deleteProjectTodo(todoId);
+  }).then(() => {
+    res.redirect(`/project?project=${projectId}&res=Todo gelöscht`);
+  }).catch((msg) => {
+    res.redirect(`/project?project=${projectId}&res=${msg}`);
+  });
+});
+
+app.get('/del-project', (req, res) => {
+  if (!auth.checkLogin(req, res)) return;
+
+  let projectId = req.query.projectId;
+
+  db.isMaintainer(projectId, req.session.userId).then(hasAccess => {
+    if (!hasAccess) throw new Error("Keine Zugriffsrechte auf dieses Projekt");
+    else return db.deleteProject(projectId);
+  }).then(() => {
+    res.redirect(`/projects?res=Projekt gelöscht`);
+  }).catch((msg) => {
+    res.redirect(`/projects?res=${msg}`);
+  });
+});
+
 // ===== 404 ===== //
-app.get('*', function(req, res) {
+app.get('*', (req, res) => {
   res.status(404).send('File not found').end();
 });
