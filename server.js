@@ -71,10 +71,6 @@ app.get('/login', (req, res) => {
   });
 });
 
-app.get('/register', (req, res) => {
-  render.register(req, res);
-});
-
 app.get('/users', (req, res) => {
   if (!auth.checkLogin(req, res)) return;
   render.users(req, res);
